@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080c14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>TrackVerse</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes slideUp{0%{opacity:0;transform:translateY(28px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{0%{opacity:0;transform:scale(0.85)}100%{opacity:1;transform:scale(1)}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.4}100%{transform:scale(4);opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(79,142,247,0.3)}50%{box-shadow:0 0 40px rgba(79,142,247,0.6)}}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes borderSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes dotPulse{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+@keyframes barShimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+@keyframes countUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);animation:ripple 0.6s linear;pointer-events:none}
+
+:root{
+  --bg:#080c14;--s1:#0f1623;--s2:#161e2e;--s3:#1c2740;
+  --border:#1e3050;--ac:#4f8ef7;--ac2:#2563eb;
+  --text:#e8f0fe;--muted:#5878a0;
+  --shadow:0 8px 32px rgba(0,0,0,0.5);
+  --shadow-sm:0 2px 10px rgba(0,0,0,0.3);
+}
+body.L{
+  --bg:#eef2ff;--s1:#fff;--s2:#f0f4ff;--s3:#e0e8ff;
+  --border:#c7d7f5;--text:#1a2a4a;--muted:#7a90b8;
+  --shadow:0 8px 32px rgba(80,120,200,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow-y:auto;overflow-x:hidden}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:#080c14;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:6px;color:#fff;animation:scaleIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both}
+.splash-sub{font-size:0.75rem;color:rgba(255,255,255,0.4);letter-spacing:4px;text-transform:uppercase;margin-top:6px;animation:fadeIn 0.8s 0.3s ease both}
+.splash-line{width:60px;height:2px;background:linear-gradient(90deg,#2563eb,#4f8ef7);border-radius:99px;margin:16px auto;animation:scaleIn 0.5s 0.5s ease both}
+.splash-loading{width:180px;height:2px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;margin-top:32px;animation:fadeIn 0.5s 0.6s ease both}
+.splash-bar{height:100%;width:0%;background:linear-gradient(90deg,#2563eb,#4f8ef7,#7c3aed);border-radius:99px;transition:width 0.05s linear}
+
+/* HEADER */
+.header{padding:20px 16px 0;position:relative;z-index:1;animation:slideDown 0.5s ease both}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:4px;background:linear-gradient(135deg,#4f8ef7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.brand-sub{font-size:0.6rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.theme-btn{background:var(--s2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all 0.2s;color:var(--text)}
+.theme-btn:active{transform:scale(0.88)}
+
+/* HERO CARD */
+.hero-card{margin:0 16px 20px;background:linear-gradient(135deg,#0d1829 0%,#0f2347 50%,#0a1525 100%);border:1px solid rgba(79,142,247,0.2);border-radius:20px;padding:20px;position:relative;overflow:hidden;animation:scaleIn 0.5s 0.1s ease both;box-shadow:0 8px 32px rgba(37,99,235,0.2)}
+.hero-card::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,0.12) 0%,transparent 70%);pointer-events:none}
+.hero-card::after{content:'';position:absolute;bottom:-60px;left:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.1) 0%,transparent 70%);pointer-events:none}
+.hero-greeting{font-size:0.65rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.hero-name{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:12px}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.hstat{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:9px;text-align:center}
+.hstat-v{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px}
+.hstat-l{font-size:0.55rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px}
+
+/* SECTION TITLE */
+.sec-tit{padding:0 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;animation:fadeIn 0.5s 0.15s ease both}
+.sec-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sec-label::before{content:'';width:3px;height:14px;border-radius:99px;background:linear-gradient(180deg,#4f8ef7,#7c3aed)}
+
+/* APPS GRID */
+.apps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:10px}
+.app-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:16px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.18s,box-shadow 0.18s;text-decoration:none;display:block;box-shadow:var(--shadow-sm)}
+.app-card:active{transform:scale(0.96);box-shadow:none}
+.app-card.featured{grid-column:span 2;display:flex;align-items:center;gap:14px;padding:18px}
+.app-icon{font-size:2.2rem;margin-bottom:10px;display:block;animation:float 3s ease-in-out infinite}
+.app-card.featured .app-icon{font-size:2.8rem;margin-bottom:0;animation:float 3s ease-in-out infinite}
+.app-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;margin-bottom:3px;line-height:1}
+.app-desc{font-size:0.62rem;color:var(--muted);line-height:1.4}
+.app-badge{position:absolute;top:10px;right:10px;font-size:0.55rem;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:0.5px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase}
+.badge-new{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.25)}
+.badge-pro{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.25)}
+.badge-soon{background:rgba(88,120,160,0.15);color:var(--muted);border:1px solid rgba(88,120,160,0.2)}
+/* Accent line en cada card */
+.app-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 18px 18px;opacity:0.7}
+/* Colores por app */
+.ac-rider::after{background:linear-gradient(90deg,#2563eb,#4f8ef7)}
+.ac-rider{border-color:rgba(79,142,247,0.2)}
+.ac-cliente::after{background:linear-gradient(90deg,#25d366,#128c7e)}
+.ac-cliente{border-color:rgba(37,211,102,0.2)}
+.ac-moto::after{background:linear-gradient(90deg,#f59e0b,#f97316)}
+.ac-moto{border-color:rgba(245,158,11,0.2)}
+.ac-money::after{background:linear-gradient(90deg,#22c55e,#16a34a)}
+.ac-money{border-color:rgba(34,197,94,0.2)}
+.ac-wallet::after{background:linear-gradient(90deg,#a855f7,#7c3aed)}
+.ac-wallet{border-color:rgba(168,85,247,0.2)}
+.ac-fit::after{background:linear-gradient(90deg,#ef4444,#f97316)}
+.ac-fit{border-color:rgba(239,68,68,0.2)}
+.ac-time::after{background:linear-gradient(90deg,#06b6d4,#3b82f6)}
+.ac-time{border-color:rgba(6,182,212,0.2)}
+.ac-health::after{background:linear-gradient(90deg,#ec4899,#a855f7)}
+.ac-health{border-color:rgba(236,72,153,0.2)}
+/* Glow on featured */
+.app-card.featured.ac-rider{box-shadow:0 4px 24px rgba(79,142,247,0.15),var(--shadow-sm)}
+
+/* BOTTOM NAV */
+.bottom-pad{height:20px}
+
+/* PARTICLES bg */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:rgba(79,142,247,0.06);animation:float 6s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <!-- Fondo con gradiente animado -->
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(37,99,235,0.15) 0%,transparent 60%),radial-gradient(ellipse at 70% 60%,rgba(124,58,237,0.12) 0%,transparent 60%);pointer-events:none"></div>
+
+  <div style="text-align:center;position:relative;z-index:1;padding:0 30px">
+    <!-- Icono animado con anillo giratorio -->
+    <div style="position:relative;width:90px;height:90px;margin:0 auto 24px">
+      <!-- Anillo exterior giratorio -->
+      <div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;border-top-color:#4f8ef7;border-right-color:#7c3aed;animation:borderSpin 1.2s linear infinite"></div>
+      <!-- Anillo interior opuesto -->
+      <div style="position:absolute;inset:4px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:rgba(79,142,247,0.4);border-left-color:rgba(124,58,237,0.4);animation:borderSpin 1.8s linear infinite reverse"></div>
+      <!-- Centro -->
+      <div style="position:absolute;inset:10px;border-radius:50%;background:linear-gradient(135deg,rgba(37,99,235,0.2),rgba(124,58,237,0.2));border:1px solid rgba(79,142,247,0.2);display:flex;align-items:center;justify-content:center">
+        <span style="font-size:1.8rem;animation:float 2s ease-in-out infinite">&#128757;</span>
+      </div>
+    </div>
+
+    <!-- Logo -->
+    <div class="splash-logo" style="margin-bottom:4px">TRACKVERSE</div>
+    <div class="splash-sub" style="margin-bottom:28px">Tu ecosistema personal</div>
+
+    <!-- Barra de carga con shimmer -->
+    <div style="width:220px;margin:0 auto 14px">
+      <div style="background:rgba(255,255,255,0.06);border-radius:99px;height:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)">
+        <div id="splash-bar" style="height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#2563eb,#4f8ef7,#7c3aed,#4f8ef7);background-size:200px 100%;animation:barShimmer 1.2s linear infinite;transition:width 0.15s ease"></div>
+      </div>
+    </div>
+
+    <!-- Porcentaje y estado -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:rgba(255,255,255,0.6);letter-spacing:2px" id="splash-pct">0%</div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <span style="width:6px;height:6px;border-radius:50%;background:#4f8ef7;animation:dotPulse 1.2s ease-in-out infinite;animation-delay:0s;display:block"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:#7c3aed;animation:dotPulse 1.2s ease-in-out infinite;animation-delay:0.2s;display:block"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:#4f8ef7;animation:dotPulse 1.2s ease-in-out infinite;animation-delay:0.4s;display:block"></span>
+      </div>
+    </div>
+
+    <!-- Estado de carga rotativo -->
+    <div style="font-size:0.62rem;color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;height:16px" id="splash-status">Iniciando...</div>
+
+    <!-- Apps preview mini -->
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:32px;opacity:0.3">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(79,142,247,0.2);border:1px solid rgba(79,142,247,0.2);display:flex;align-items:center;justify-content:center;font-size:1rem">&#128757;</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem">&#128172;</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem">&#127949;&#65039;</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem">&#128176;</div>
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem">&#129689;</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="brand">TRACKVERSE</div>
+      <div class="brand-sub">Tu ecosistema personal</div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-btn" onclick="togTheme()" id="themeBtn">&#9728;&#65039;</button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero-card" id="hero-card">
+  <div class="hero-greeting" id="hero-greeting">Buenos días</div>
+  <div class="hero-name">Rudy Alen 👋</div>
+  <div class="hero-stats">
+    <div class="hstat">
+      <div class="hstat-v" style="color:#4f8ef7" id="h-clientes">0</div>
+      <div class="hstat-l">Clientes hoy</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-v" style="color:#22c55e" id="h-entregados">0</div>
+      <div class="hstat-l">Entregados</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-v" style="color:#f59e0b" id="h-moto">0 km</div>
+      <div class="hstat-l">Moto hoy</div>
+    </div>
+  </div>
+</div>
+
+<!-- APPS TRABAJO -->
+<div class="sec-tit" style="animation-delay:0.2s">
+  <div class="sec-label">&#128757; Trabajo</div>
+</div>
+<div class="apps-grid" style="animation:slideUp 0.5s 0.2s ease both">
+  <a href="index.html" class="app-card featured ac-rider">
+    <span class="app-icon" style="animation-delay:0s">&#128757;</span>
+    <div>
+      <div class="app-name">RiderTrack</div>
+      <div class="app-desc">Rutas diarias · Clientes · Excel · Historial</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <span style="background:rgba(79,142,247,0.12);color:#4f8ef7;font-size:0.58rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid rgba(79,142,247,0.2)">&#128203; Rutas</span>
+        <span style="background:rgba(79,142,247,0.12);color:#4f8ef7;font-size:0.58rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid rgba(79,142,247,0.2)">&#128202; Excel</span>
+      </div>
+    </div>
+  </a>
+  <a href="clientetrack.html" class="app-card ac-cliente">
+    <span class="app-badge badge-new">Nuevo</span>
+    <span class="app-icon" style="animation-delay:0.1s">&#128172;</span>
+    <div class="app-name">ClienteTrack</div>
+    <div class="app-desc">Mensajes · WhatsApp · QR · Reportes</div>
+  </a>
+  <a href="moto.html" class="app-card ac-moto">
+    <span class="app-icon" style="animation-delay:0.2s">&#127949;&#65039;</span>
+    <div class="app-name">MotoTrack</div>
+    <div class="app-desc">Mantenimiento · Km · Alertas</div>
+  </a>
+</div>
+
+<!-- APPS FINANZAS -->
+<div class="sec-tit" style="animation-delay:0.3s">
+  <div class="sec-label">&#128176; Finanzas</div>
+</div>
+<div class="apps-grid" style="animation:slideUp 0.5s 0.3s ease both">
+  <a href="moneytrack.html" class="app-card ac-money">
+    <span class="app-badge badge-new">Nuevo</span>
+    <span class="app-icon" style="animation-delay:0.3s">&#128176;</span>
+    <div class="app-name">MoneyTrack</div>
+    <div class="app-desc">Metas de ahorro · Abonos · Progreso</div>
+  </a>
+  <a href="wallettrack.html" class="app-card ac-wallet">
+    <span class="app-badge badge-soon">Pronto</span>
+    <span class="app-icon" style="animation-delay:0.4s">&#129689;</span>
+    <div class="app-name">WalletTrack</div>
+    <div class="app-desc">Gastos diarios · Presupuesto · Ingresos</div>
+  </a>
+</div>
+
+<!-- APPS SALUD Y VIDA -->
+<div class="sec-tit" style="animation-delay:0.4s">
+  <div class="sec-label">&#128170; Salud y vida</div>
+</div>
+<div class="apps-grid" style="animation:slideUp 0.5s 0.4s ease both">
+  <a href="fittrack.html" class="app-card ac-fit">
+    <span class="app-badge badge-soon">Pronto</span>
+    <span class="app-icon" style="animation-delay:0.5s">&#128170;</span>
+    <div class="app-name">FitTrack</div>
+    <div class="app-desc">Gimnasio · Ejercicios · Progreso</div>
+  </a>
+  <a href="healthtrack.html" class="app-card ac-health">
+    <span class="app-badge badge-soon">Pronto</span>
+    <span class="app-icon" style="animation-delay:0.6s">&#128138;</span>
+    <div class="app-name">HealthTrack</div>
+    <div class="app-desc">Hábitos · Agua · Medicina · Sueño</div>
+  </a>
+  <a href="timetrack.html" class="app-card ac-time" style="grid-column:span 2">
+    <span class="app-badge badge-soon">Pronto</span>
+    <span class="app-icon" style="animation-delay:0.7s;font-size:1.8rem;margin-bottom:0;margin-right:12px;float:left">&#128197;</span>
+    <div>
+      <div class="app-name">TimeTrack</div>
+      <div class="app-desc">Agenda · Calendario · Tareas · Planificación</div>
+    </div>
+  </a>
+</div>
+
+<div class="bottom-pad"></div>
+
+<script>
+// SPLASH ANIMADO — mas lento y epico
+var splashBar=document.getElementById('splash-bar');
+var splashPct=document.getElementById('splash-pct');
+var splashStatus=document.getElementById('splash-status');
+var pct=0;
+var ESTADOS=[
+  {p:15, txt:'Cargando RiderTrack...'},
+  {p:30, txt:'Sincronizando datos...'},
+  {p:48, txt:'Iniciando ClienteTrack...'},
+  {p:62, txt:'Cargando MotoTrack...'},
+  {p:75, txt:'Preparando MoneyTrack...'},
+  {p:88, txt:'Conectando apps...'},
+  {p:96, txt:'Casi listo...'},
+  {p:100,txt:'Bienvenido Rudy! 🚀'},
+];
+var estadoIdx=0;
+var splashInterval=setInterval(function(){
+  // Velocidad variable — arranca rapido, se frena a mitad, termina
+  var speed=pct<30?3:pct<70?1.5:pct<90?2.5:1.2;
+  pct+=speed*(Math.random()*0.8+0.6);
+  if(pct>=100)pct=100;
+  splashBar.style.width=pct+'%';
+  if(splashPct)splashPct.textContent=Math.round(pct)+'%';
+  // Cambiar estado
+  if(estadoIdx<ESTADOS.length&&pct>=ESTADOS[estadoIdx].p){
+    if(splashStatus)splashStatus.textContent=ESTADOS[estadoIdx].txt;
+    estadoIdx++;
+  }
+  if(pct>=100){
+    clearInterval(splashInterval);
+    setTimeout(function(){
+      var sp=document.getElementById('splash');
+      sp.style.transition='opacity 0.7s ease';
+      sp.style.opacity='0';
+      setTimeout(function(){sp.style.display='none';},700);
+    },600);
+  }
+},80);
+
+// PARTICLES
+(function(){
+  var p=document.getElementById('particles');
+  for(var i=0;i<8;i++){
+    var d=document.createElement('div');
+    var sz=Math.random()*80+30;
+    d.className='particle';
+    d.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;animation-delay:'+(Math.random()*4)+'s;animation-duration:'+(5+Math.random()*4)+'s';
+    p.appendChild(d);
+  }
+})();
+
+// GREETING
+(function(){
+  var h=new Date().getHours();
+  var g=h<12?'Buenos días ☀️':h<18?'Buenas tardes 🌤️':'Buenas noches 🌙';
+  document.getElementById('hero-greeting').textContent=g;
+})();
+
+// THEME
+function togTheme(){
+  var isL=document.body.classList.toggle('L');
+  document.getElementById('themeBtn').textContent=isL?'🌙':'☀️';
+  localStorage.setItem('hub_theme',isL?'L':'D');
+  // Sync a RiderTrack
+  try{var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');rd.light=isL;localStorage.setItem('urRoute',JSON.stringify(rd));}catch(e){}
+}
+// Cargar tema
+(function(){
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  if(rd.light){document.body.classList.add('L');document.getElementById('themeBtn').textContent='🌙';}
+  if(rd.ac)document.documentElement.style.setProperty('--ac',rd.ac);
+  if(rd.ac2)document.documentElement.style.setProperty('--ac2',rd.ac2);
+})();
+
+// STATS desde RiderTrack
+(function(){
+  try{
+    var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+    var cl=rd.cl||[];
+    var total=cl.length;
+    var ent=cl.filter(function(c){return c.st&&c.st!=='pendiente'&&!['fallida','rechazado','devuelto','cancelado'].includes(c.st);}).length;
+    document.getElementById('h-clientes').textContent=total;
+    document.getElementById('h-entregados').textContent=ent;
+    // Moto
+    var moto=JSON.parse(localStorage.getItem('moto_data')||'{}');
+    var hoy=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+    var kmHoy=0;
+    if(moto.hist&&moto.hist.length&&moto.hist[0].fecha===hoy)kmHoy=moto.hist[0].km;
+    document.getElementById('h-moto').textContent=kmHoy>0?'+'+kmHoy+' km':'–';
+  }catch(e){}
+})();
+
+// RIPPLE
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.app-card,.theme-btn');if(!b)return;
+  var r=document.createElement('span');var rect=b.getBoundingClientRect();
+  var sz=Math.max(rect.width,rect.height)*2;r.className='rip';
+  r.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(e.clientX-rect.left-sz/2)+'px;top:'+(e.clientY-rect.top-sz/2)+'px';
+  b.appendChild(r);setTimeout(function(){r.remove();},700);
+});
+
+// Apps "pronto" — no navegar
+document.querySelectorAll('.badge-soon').forEach(function(badge){
+  var card=badge.closest('.app-card');
+  if(card){
+    card.addEventListener('click',function(e){
+      e.preventDefault();
+      var name=card.querySelector('.app-name').textContent;
+      showToast('🚀 '+name+' — Próximamente');
+    });
+  }
+});
+
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f1623;border:1px solid #1e3050;border-radius:12px;padding:12px 20px;color:#e8f0fe;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,0.5);white-space:nowrap;animation:scaleIn 0.3s ease';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2500);
+}
+</script>
+</body>
+</html>
