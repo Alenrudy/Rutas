@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1623">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ClienteTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+@keyframes slideUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(0.88)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.4}100%{transform:scale(4);opacity:0}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,0.22);animation:ripple 0.55s linear;pointer-events:none}
+:root{
+  --bg:#080c14;--s1:#0f1623;--s2:#161e2e;--s3:#1c2740;
+  --border:#1e3050;--ac:#4f8ef7;--ac2:#2563eb;
+  --acg:linear-gradient(135deg,#2563eb,#4f8ef7);
+  --green:#22c55e;--red:#f43f5e;--warn:#f59e0b;--purple:#a855f7;
+  --wa:linear-gradient(135deg,#075e54,#128c7e);
+  --text:#e8f0fe;--muted:#5878a0;--mu2:#1e3050;
+  --shadow:0 4px 24px rgba(0,0,0,0.45);--shadow-sm:0 2px 10px rgba(0,0,0,0.3);
+  --r:16px;--r-sm:10px;--r-xs:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;display:flex;flex-direction:column}
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 14px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-sm);z-index:10}
+.tit{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--ac)}
+.sub{font-size:0.6rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;margin-top:1px}
+.back{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--text);width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;text-decoration:none;transition:all 0.18s;flex-shrink:0;cursor:pointer;border:none}
+.back:active{transform:scale(0.88)}
+.nav{display:flex;background:var(--s1);border-top:1px solid var(--border);flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.2)}
+.nb{flex:1;padding:8px 4px 6px;background:none;border:none;border-top:2.5px solid transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.52rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.2s;position:relative;overflow:hidden}
+.nb i{font-size:1rem;display:block;margin-bottom:2px}
+.nb.on{color:var(--ac);border-top-color:var(--ac)}
+.pages{flex:1;overflow:hidden;position:relative}
+.page{display:none;height:100%;overflow-y:auto;padding:13px 13px 28px;animation:fadeIn 0.2s ease;scrollbar-width:none}
+.page::-webkit-scrollbar{display:none}
+.page.on{display:block}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.ct{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1.5px;color:var(--ac);margin-bottom:2px}
+.ps{font-size:0.7rem;color:var(--muted);margin-bottom:12px;font-family:'Barlow Condensed',sans-serif}
+input,textarea,select{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r-xs);padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.18s}
+input:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(79,142,247,0.12)}
+input::placeholder,textarea::placeholder{color:var(--mu2)}
+.ig{margin-bottom:9px}
+.ig label{font-size:0.65rem;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--r-sm);font-family:'Bebas Neue',sans-serif;font-size:0.9rem;cursor:pointer;letter-spacing:0.8px;position:relative;overflow:hidden;transition:transform 0.15s,opacity 0.15s;min-height:44px}
+.btn:active{transform:scale(0.965);opacity:0.88}
+.bg{background:var(--acg);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,0.3)}
+.bwa{background:var(--wa);color:#fff;box-shadow:0 4px 14px rgba(7,94,84,0.35)}
+.bgr{background:var(--s2);color:var(--text);border:1.5px solid var(--border);font-family:'Barlow',sans-serif;font-size:0.82rem}
+.brd{background:none;border:1.5px solid rgba(244,63,94,0.35);color:var(--red);font-family:'Barlow',sans-serif;font-size:0.75rem;padding:9px}
+.sm{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.6rem;padding:3px 9px;cursor:pointer;font-family:'Barlow',sans-serif;transition:all 0.18s}
+.sm:active{transform:scale(0.9)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dv{height:1px;background:var(--border);margin:10px 0}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);font-size:0.8rem}
+.empty .ei{font-size:2.5rem;margin-bottom:8px;display:block;opacity:0.5}
+/* CLIENTE CARD */
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow-sm);animation:slideUp 0.22s ease both}
+.cc-header{display:flex;align-items:center;gap:10px;padding:12px 13px;cursor:pointer}
+.cc-num{width:30px;height:30px;border-radius:50%;background:var(--acg);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:#fff;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,0.3)}
+.cc-info{flex:1;min-width:0}
+.cc-nombre{font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-prod{font-size:0.68rem;color:var(--muted);margin-top:1px}
+.cc-right{flex-shrink:0;text-align:right}
+.cc-precio{font-family:'Bebas Neue',sans-serif;font-size:1.05rem}
+.cc-body{display:none;padding:11px 13px 13px;border-top:1px solid var(--border);background:var(--s2)}
+.cc-body.open{display:block;animation:fadeIn 0.18s ease}
+/* ESTADO BADGES */
+.est{font-size:0.57rem;font-weight:700;padding:2px 8px;border-radius:99px;display:inline-block;margin-top:3px;letter-spacing:0.5px}
+.est-p{background:rgba(120,120,140,0.15);color:var(--muted)}
+.est-o{background:rgba(34,197,94,0.15);color:var(--green)}
+.est-e{background:rgba(96,165,250,0.15);color:#60a5fa}
+.est-f{background:rgba(244,63,94,0.15);color:var(--red)}
+.est-w{background:rgba(245,158,11,0.15);color:var(--warn)}
+/* BOTONES ACCION */
+.abtn{padding:10px 8px;border-radius:var(--r-xs);border:1.5px solid var(--border);background:var(--s1);color:var(--text);font-family:'Barlow',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;text-align:center;transition:all 0.18s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center}
+.abtn:active{transform:scale(0.92)}
+.abtn .ai{font-size:1.2rem}
+.abtn-wa{border-color:rgba(37,211,102,0.35);background:rgba(37,211,102,0.08);color:#25d366}
+.abtn-qr{border-color:rgba(155,89,182,0.35);background:rgba(155,89,182,0.08);color:#c39bd3}
+.abtn-msg{border-color:rgba(79,142,247,0.35);background:rgba(79,142,247,0.08);color:var(--ac)}
+/* STATUS PILLS */
+.spill{padding:6px 10px;border-radius:99px;font-size:0.62rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--s2);color:var(--muted);transition:all 0.18s;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase}
+.spill:active{transform:scale(0.92)}
+.spill.on-o{border-color:var(--green);background:rgba(34,197,94,0.12);color:var(--green)}
+.spill.on-e{border-color:#60a5fa;background:rgba(96,165,250,0.12);color:#60a5fa}
+.spill.on-f{border-color:var(--red);background:rgba(244,63,94,0.12);color:var(--red)}
+.spill.on-w{border-color:var(--warn);background:rgba(245,158,11,0.12);color:var(--warn)}
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:3000;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.modal-ov.open{display:flex}
+.modal{background:var(--s1);border-radius:24px 24px 0 0;padding:20px 18px 32px;width:100%;max-width:440px;border-top:1px solid var(--border);box-shadow:0 -8px 40px rgba(0,0,0,0.5);animation:slideUp 0.28s ease;max-height:90vh;overflow-y:auto}
+/* MASIVO */
+.check-cli{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:var(--r-xs);margin-bottom:6px;cursor:pointer;border:1.5px solid var(--border);transition:all 0.18s}
+.check-cli.sel{border-color:var(--ac);background:rgba(79,142,247,0.1)}
+.check-cli:active{transform:scale(0.98)}
+/* SEARCH */
+.sw{position:relative;margin-bottom:10px}
+.sw input{padding-left:36px}
+.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+/* FILTER CHIPS */
+.fc{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+.fc::-webkit-scrollbar{display:none}
+.fch{padding:5px 13px;border-radius:99px;font-size:0.62rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--s2);color:var(--muted);white-space:nowrap;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;transition:all 0.18s}
+.fch.on{border-color:var(--ac);background:rgba(79,142,247,0.12);color:var(--ac)}
+.fch:active{transform:scale(0.92)}
+/* BIBLIOTECA */
+.bib-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;margin-bottom:7px;animation:slideUp 0.2s ease both}
+/* STIT */
+.stit{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:12px 0 7px;font-family:'Barlow Condensed',sans-serif;display:flex;align-items:center;gap:6px}
+.stit::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="back" id="backBtn">&#8592;</button>
+  <div style="flex:1;margin:0 10px">
+    <div class="tit">&#128172; CLIENTETRACK</div>
+    <div class="sub" id="topFecha"></div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button onclick="goTo('masivo',document.querySelectorAll('.nb')[2])" style="background:rgba(79,142,247,0.15);border:1.5px solid rgba(79,142,247,0.3);border-radius:8px;padding:5px 10px;color:var(--ac);font-size:0.7rem;font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif">&#128227; MASIVO</button>
+    <div id="badge-total" style="background:var(--acg);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:0.85rem;padding:3px 11px;border-radius:99px;letter-spacing:1px;box-shadow:0 2px 8px rgba(79,142,247,0.35)">0/0</div>
+  </div>
+</div>
+<nav class="nav">
+  <button class="nb on" onclick="goTo('clientes',this)"><i>&#128203;</i>CLIENTES</button>
+  <button class="nb" onclick="goTo('biblioteca',this)"><i>&#128172;</i>MENSAJES</button>
+  <button class="nb" onclick="goTo('masivo',this)"><i>&#128227;</i>MASIVO</button>
+  <button class="nb" onclick="goTo('config',this)"><i>&#9881;&#65039;</i>CONFIG</button>
+</nav>
+<div class="pages">
+
+<!-- CLIENTES -->
+<div class="page on" id="page-clientes">
+  <div class="pt">Clientes de hoy</div>
+  <div class="ps" id="ps-clientes">Sincronizado con RiderTrack</div>
+  <div class="sw"><span class="si">&#128269;</span><input type="text" id="srch" placeholder="Buscar cliente..." oninput="filtrar()"></div>
+  <div class="fc">
+    <span class="fch on" data-f="t" onclick="setFil(this)">TODOS</span>
+    <span class="fch" data-f="p" onclick="setFil(this)">&#9203; Pendiente</span>
+    <span class="fch" data-f="o" onclick="setFil(this)">&#10003; Entregado</span>
+    <span class="fch" data-f="e" onclick="setFil(this)">&#127962; Empresa</span>
+    <span class="fch" data-f="f" onclick="setFil(this)">&#10060; Fallido</span>
+    <span class="fch" data-f="w" onclick="setFil(this)">&#128260; Reprog.</span>
+  </div>
+  <div id="lista-clientes">
+    <div class="empty"><div class="ei">&#128203;</div>Abre RiderTrack e importa tus clientes del dia</div>
+  </div>
+</div>
+
+<!-- BIBLIOTECA -->
+<div class="page" id="page-biblioteca">
+  <div class="pt">Mensajes</div><div class="ps">Biblioteca de plantillas</div>
+  <div class="card" style="border-color:rgba(79,142,247,0.25)">
+    <div class="ct"><span style="color:var(--ac)">&#43;</span> Nueva plantilla</div>
+    <div class="ig"><label>Nombre de la plantilla</label><input type="text" id="bib-nombre" placeholder="Ej: Mensaje de llegada"></div>
+    <div class="ig"><label>Mensaje</label><textarea id="bib-msg" rows="3" placeholder="Hola {nombre}, ya llego con tu {producto}..."></textarea></div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+      <span onclick="insTag('{nombre}')" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:var(--ac);cursor:pointer;font-weight:700">{nombre}</span>
+      <span onclick="insTag('{producto}')" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:var(--ac);cursor:pointer;font-weight:700">{producto}</span>
+      <span onclick="insTag('{precio}')" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:var(--ac);cursor:pointer;font-weight:700">{precio}</span>
+      <span onclick="insTag('{cobrar}')" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:var(--ac);cursor:pointer;font-weight:700">{cobrar}</span>
+      <span onclick="insTag('{distrito}')" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:var(--ac);cursor:pointer;font-weight:700">{distrito}</span>
+      <span onclick="insTag('{yape}')" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:var(--ac);cursor:pointer;font-weight:700">{yape}</span>
+    </div>
+    <button class="btn bg" onclick="guardarBib()">&#128190; GUARDAR PLANTILLA</button>
+  </div>
+  <div class="stit">Plantillas guardadas</div>
+  <div id="lista-bib">
+    <div class="empty"><div class="ei">&#128172;</div>Sin plantillas aun</div>
+  </div>
+</div>
+
+<!-- MASIVO -->
+<div class="page" id="page-masivo">
+  <div class="pt">Mensaje Masivo</div><div class="ps">Envia a varios clientes a la vez</div>
+  <div class="card" style="border-color:rgba(79,142,247,0.25)">
+    <div class="ct"><span style="color:var(--ac)">&#128172;</span> Mensaje a enviar</div>
+    <textarea id="masivo-msg" rows="3" placeholder="Hola {nombre}, ya salgo con tu pedido..." style="margin-bottom:8px"></textarea>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+      <span onclick="insTagMasivo('{nombre}')" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:#25d366;cursor:pointer;font-weight:700">{nombre}</span>
+      <span onclick="insTagMasivo('{producto}')" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:#25d366;cursor:pointer;font-weight:700">{producto}</span>
+      <span onclick="insTagMasivo('{cobrar}')" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:6px;padding:3px 8px;font-size:0.65rem;color:#25d366;cursor:pointer;font-weight:700">{cobrar}</span>
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:10px">
+      <button class="btn bg" onclick="selTodosM()" style="font-size:0.8rem">&#10003; Todos</button>
+      <button class="btn bgr" onclick="deselTodosM()" style="font-size:0.8rem">&#10007; Ninguno</button>
+    </div>
+  </div>
+  <div id="lista-masivo"><div class="empty"><div class="ei">&#128227;</div>Sin clientes cargados</div></div>
+  <div id="masivo-actions" style="display:none;position:sticky;bottom:8px">
+    <button class="btn bwa" onclick="enviarMasivo()">&#128172; ENVIAR A SELECCIONADOS (<span id="masivo-count">0</span>)</button>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="page" id="page-config">
+  <div class="pt">Configuración</div><div class="ps">Datos para mensajes y QR</div>
+  <div class="card">
+    <div class="ct"><span style="color:var(--ac)">&#128242;</span> Mis datos de cobro</div>
+    <div class="ig"><label>&#128242; Mi numero Yape</label><input type="text" id="cfg-yape" placeholder="987654321" inputmode="numeric"></div>
+    <div class="ig"><label>&#128242; Numero Plin/Yape empresa</label><input type="text" id="cfg-plin" placeholder="987654321" inputmode="numeric"></div>
+    <div class="ig"><label>&#128100; Mi nombre (para mensajes)</label><input type="text" id="cfg-nombre" placeholder="Rudy"></div>
+    <button class="btn bg" onclick="guardarConfig()" style="margin-bottom:6px">&#128190; GUARDAR DATOS</button>
+  </div>
+  <div class="card">
+    <div class="ct"><span style="color:var(--ac)">&#9201;&#65039;</span> Horario de entrega</div>
+    <div class="g2">
+      <div class="ig"><label>Hora inicio</label><input type="time" id="cfg-hi" value="09:00"></div>
+      <div class="ig"><label>Hora fin</label><input type="time" id="cfg-hf" value="13:00"></div>
+    </div>
+    <button class="btn bgr" onclick="guardarConfig()" style="font-size:0.82rem">&#128190; Guardar horario</button>
+  </div>
+  <div class="card" style="border-color:rgba(79,142,247,0.2)">
+    <div class="ct"><span style="color:var(--ac)">&#128203;</span> Sincronizacion</div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px">ClienteTrack lee automaticamente los clientes de RiderTrack. Los cambios de estado se sincronizan al instante.</div>
+    <button class="btn bgr" onclick="sincronizar()" style="font-size:0.82rem">&#128260; Sincronizar ahora</button>
+  </div>
+</div>
+
+</div><!-- end pages -->
+
+<!-- MODAL: CLIENTE DETALLE -->
+<div class="modal-ov" id="modal-cli" onclick="if(event.target===this)cerrarModal('modal-cli')">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px;color:var(--ac)" id="m-nombre">Cliente</div>
+        <div style="font-size:0.7rem;color:var(--muted)" id="m-prod"></div>
+      </div>
+      <button onclick="cerrarModal('modal-cli')" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text)">✕</button>
+    </div>
+    <!-- Info rápida -->
+    <div style="background:var(--s2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;border:1px solid var(--border)">
+      <div class="g2" style="gap:6px">
+        <div><div style="font-size:0.6rem;color:var(--muted)">Precio</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--ac)" id="m-precio">S/ 0</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted)">A cobrar</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--green)" id="m-cobrar">S/ 0</div></div>
+      </div>
+      <div style="margin-top:8px;font-size:0.7rem;color:var(--muted)" id="m-dir"></div>
+      <div style="font-size:0.7rem;color:var(--muted)" id="m-dist"></div>
+    </div>
+    <!-- BOTONES PRINCIPALES -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px">
+      <button class="abtn abtn-wa" onclick="waCliente()"><div class="ai">&#128172;</div>WhatsApp</button>
+      <button class="abtn abtn-qr" onclick="qrCliente()"><div class="ai">&#128241;</div>Ver QR</button>
+      <button class="abtn abtn-msg" onclick="bibCliente()"><div class="ai">&#128218;</div>Plantilla</button>
+    </div>
+    <!-- MENSAJE PREVIEW -->
+    <div style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.2);border-radius:var(--r-sm);padding:11px;margin-bottom:12px">
+      <div style="font-size:0.6rem;color:#25d366;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">&#128172; Mensaje para este cliente</div>
+      <div style="font-size:0.75rem;color:var(--text);line-height:1.5" id="m-preview"></div>
+      <button onclick="copiarMensaje()" style="width:100%;margin-top:8px;padding:8px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:8px;color:#25d366;font-weight:700;cursor:pointer;font-size:0.75rem;font-family:'Barlow',sans-serif;transition:all 0.18s">&#128203; Copiar mensaje</button>
+    </div>
+    <!-- ESTADO -->
+    <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:7px">&#128308; Cambiar estado</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="spill" onclick="setEstado('efectivo')">&#128181; Entregado</span>
+      <span class="spill" onclick="setEstado('empresa')">&#127962; Empresa</span>
+      <span class="spill" onclick="setEstado('reprogramar')">&#128260; Reprog.</span>
+      <span class="spill" onclick="setEstado('fallida')">&#10060; Fallido</span>
+      <span class="spill" onclick="setEstado('pendiente')">&#9203; Pendiente</span>
+    </div>
+    <!-- QR PANEL -->
+    <div id="qr-panel" style="display:none;text-align:center;margin-bottom:12px">
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700">&#128241; QR de cobro</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
+        <button onclick="togQRTipo('yape')" id="qr-btn-y" style="padding:7px 16px;background:rgba(155,89,182,0.2);border:1.5px solid #9b59b6;border-radius:8px;color:#c39bd3;font-weight:700;cursor:pointer;font-size:0.75rem;font-family:'Barlow',sans-serif">&#128242; Yape</button>
+        <button onclick="togQRTipo('plin')" id="qr-btn-p" style="padding:7px 16px;background:var(--s2);border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-weight:700;cursor:pointer;font-size:0.75rem;font-family:'Barlow',sans-serif">&#128242; Plin</button>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:12px;display:inline-block;box-shadow:0 4px 20px rgba(0,0,0,0.3);cursor:pointer" onclick="ampQRModal()">
+        <img id="qr-img-modal" src="" style="width:170px;height:170px;object-fit:contain;display:block;border-radius:8px">
+        <div id="qr-ph-modal" style="width:170px;height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;font-size:0.75rem"><div style="font-size:2rem;margin-bottom:6px">&#128247;</div><div>Sin QR — configura en RiderTrack</div></div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;margin-top:8px" id="qr-num-modal"></div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:2px" id="qr-nom-modal"></div>
+      <button onclick="compartirQRCliente()" style="width:100%;margin-top:10px;padding:11px;background:var(--wa);border:none;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;font-size:0.8rem;font-family:'Barlow',sans-serif">&#128172; Compartir QR por WhatsApp</button>
+    </div>
+    <!-- BIBLIOTECA PANEL -->
+    <div id="bib-panel" style="display:none">
+      <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:7px">&#128218; Selecciona plantilla</div>
+      <div id="bib-sel-lista"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+// Lee de RiderTrack (urRoute) y datos propios (clientetrack)
+var RT=JSON.parse(localStorage.getItem('urRoute')||'{}');
+var C=JSON.parse(localStorage.getItem('clientetrack')||'{}');
+if(!C.bib)C.bib=[
+  {id:1,nombre:'Llegada',msg:'Hola {nombre}! Soy Rudy del delivery. Ya voy con tu {producto} (S/{cobrar}). Llego pronto 🛵'},
+  {id:2,nombre:'Cobro Yape',msg:'Hola {nombre}, te comparto mi Yape para el pago: {yape}. El monto es S/{cobrar} por tu {producto} ✅'},
+  {id:3,nombre:'Reprogramar',msg:'Hola {nombre}, lamentablemente no pude entregar tu pedido hoy. Lo reprogramamos para mañana. Disculpa las molestias 🙏'},
+  {id:4,nombre:'Confirmacion',msg:'Hola {nombre}! Tu pedido de {producto} está listo para entrega hoy. El total es S/{cobrar}. Te aviso cuando llegue 📦'},
+];
+if(!C.config)C.config={yape:'',plin:'',nombre:'Rudy',hi:'09:00',hf:'13:00'};
+
+var svC=function(){try{localStorage.setItem('clientetrack',JSON.stringify(C));}catch(e){}};
+var svRT=function(){try{localStorage.setItem('urRoute',JSON.stringify(RT));}catch(e){}};
+var el=function(id){return document.getElementById(id);};
+var fmt=function(n){return 'S/ '+parseFloat(n||0).toFixed(2);};
+
+var FIL='t',SRC='',cliActivo=null,qrTipoActivo='yape';
+var PL={efectivo:'Entregado',pendiente:'Pendiente','yape-rudy':'Entregado','yape-efectivo':'Entregado',pos:'Empresa',transferencia:'Empresa','jose-smith':'Empresa',empresa:'Empresa',mixto:'Entregado',fallida:'Fallido',reprogramar:'Reprogramado',rechazado:'Fallido',devuelto:'Fallido',cancelado:'Fallido',ausente:'Reprog.',cambio:'Entregado','pago-link':'Empresa','yape-plin':'Empresa','no-contesta':'Reprog.'};
+var PT=['efectivo','yape-rudy','yape-efectivo','mixto','cambio'];
+var PE=['pos','transferencia','jose-smith','empresa','pago-link','yape-plin'];
+var PF=['fallida','rechazado','devuelto','cancelado'];
+var PW=['reprogramar','ausente','no-contesta'];
+
+function stc(s){if(!s||s==='pendiente')return 'p';if(PT.includes(s))return 'o';if(PE.includes(s))return 'e';if(PF.includes(s))return 'f';if(PW.includes(s))return 'w';return 'p';}
+function estLabel(s){if(!s||s==='pendiente')return '⏳ Pendiente';if(PT.includes(s))return '✅ Entregado';if(PE.includes(s))return '🏢 Empresa';if(PF.includes(s))return '❌ Fallido';if(PW.includes(s))return '🔄 Reprog.';return '⏳ Pendiente';}
+function estClass(s){var sc=stc(s);return {p:'est-p',o:'est-o',e:'est-e',f:'est-f',w:'est-w'}[sc]||'est-p';}
+
+// RIPPLE
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.btn,.nb,.sm,.fch,.abtn,.spill,.back,.check-cli');if(!b)return;
+  var r=document.createElement('span');var rect=b.getBoundingClientRect();
+  var sz=Math.max(rect.width,rect.height)*2;r.className='rip';
+  r.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(e.clientX-rect.left-sz/2)+'px;top:'+(e.clientY-rect.top-sz/2)+'px';
+  b.appendChild(r);setTimeout(function(){r.remove();},600);
+});
+
+// BACK
+var bb=el('backBtn');
+if(bb){bb.onclick=function(){if(window.history.length>1)window.history.back();else window.location.href='index.html';};}
+
+// INIT
+el('topFecha').textContent=new Date().toLocaleDateString('es-PE',{weekday:'long',day:'2-digit',month:'long'});
+cargarConfig();
+
+// TABS
+function goTo(p,b){
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(x){x.classList.remove('on');});
+  el('page-'+p).classList.add('on');if(b)b.classList.add('on');
+  render();
+}
+
+// SINCRONIZAR con RiderTrack
+function sincronizar(){
+  RT=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  render();
+  showToast('✅ Sincronizado con RiderTrack');
+}
+
+// FILTROS
+function setFil(e){document.querySelectorAll('.fch').forEach(function(c){c.classList.remove('on');});e.classList.add('on');FIL=e.dataset.f;rClientes();}
+function filtrar(){SRC=el('srch').value.toLowerCase();rClientes();}
+function getFil(){
+  var cl=RT.cl||[];
+  return cl.filter(function(c){
+    var sc=stc(c.st);
+    var mf=FIL==='t'||(FIL==='p'&&sc==='p')||(FIL==='o'&&sc==='o')||(FIL==='e'&&sc==='e')||(FIL==='f'&&sc==='f')||(FIL==='w'&&sc==='w');
+    var ms=!SRC||c.nombre.toLowerCase().includes(SRC)||(c.prod||'').toLowerCase().includes(SRC)||(c.dist||'').toLowerCase().includes(SRC);
+    return mf&&ms;
+  });
+}
+
+// TAGS
+function aplicarTags(tmpl,c){
+  var cfg=C.config;
+  return tmpl
+    .replace(/\{nombre\}/g,(c.nombre||'').split(' ')[0])
+    .replace(/\{producto\}/g,c.prod||'su pedido')
+    .replace(/\{precio\}/g,c.precio||'0')
+    .replace(/\{cobrar\}/g,c.cobrar||c.precio||'0')
+    .replace(/\{distrito\}/g,c.dist||'')
+    .replace(/\{yape\}/g,cfg.yape||'')
+    .replace(/\{plin\}/g,cfg.plin||'')
+    .replace(/\{hora_inicio\}/g,cfg.hi||'09:00')
+    .replace(/\{hora_fin\}/g,cfg.hf||'13:00');
+}
+function getMsgDefault(c){
+  return 'Hola '+((c.nombre||'').split(' ')[0])+'! Soy '+(C.config.nombre||'Rudy')+' del delivery.\nTe traigo tu '+( c.prod||'pedido')+' · S/'+( c.cobrar||c.precio||'0')+(C.config.yape?'\nYape: '+C.config.yape:'');
+}
+
+// RENDER CLIENTES
+function rClientes(){
+  var cl=getFil();var lista=el('lista-clientes');
+  var total=(RT.cl||[]).length;
+  var ent=(RT.cl||[]).filter(function(c){return c.st&&c.st!=='pendiente'&&!PF.includes(c.st);}).length;
+  el('badge-total').textContent=ent+'/'+total;
+  el('ps-clientes').textContent='Sincronizado · '+total+' clientes';
+  if(!total){lista.innerHTML='<div class="empty"><div class="ei">📲</div>Abre RiderTrack e importa tus clientes</div>';return;}
+  if(!cl.length){lista.innerHTML='<div class="empty"><div class="ei">🔍</div>Sin resultados</div>';return;}
+  var h='';
+  cl.forEach(function(c,i){
+    var sc=stc(c.st);var tel=(c.cel||'').replace(/\s/g,'').replace(/[^0-9]/g,'');if(tel.startsWith('51')&&tel.length>9)tel=tel.slice(2);
+    var col=sc==='o'?'var(--green)':sc==='e'?'var(--blue)':sc==='f'?'var(--red)':sc==='w'?'var(--warn)':'var(--muted)';
+    h+='<div class="cc" style="animation-delay:'+(i*0.04)+'s">';
+    h+='<div class="cc-header" onclick="abrirCli('+c.id+')">';
+    h+='<div class="cc-num">'+( c.num||i+1)+'</div>';
+    h+='<div class="cc-info"><div class="cc-nombre">'+c.nombre+'</div><div class="cc-prod">'+(c.prod||'–')+(c.dist?' · '+c.dist:'')+'</div><span class="est '+estClass(c.st)+'">'+estLabel(c.st)+'</span></div>';
+    h+='<div class="cc-right"><div class="cc-precio" style="color:'+col+'">'+fmt(c.cobrar||0)+'</div>';
+    if(tel){
+      h+='<div style="display:flex;flex-direction:column;gap:3px;margin-top:5px">';
+      h+='<a href="https://wa.me/51'+tel+'?text='+encodeURIComponent(getMsgDefault(c))+'" onclick="event.stopPropagation()" target="_blank" style="background:var(--wa);color:#fff;border-radius:6px;padding:3px 8px;font-size:0.62rem;font-weight:700;text-align:center;text-decoration:none;display:block">&#128172; WA</a>';
+      h+='</div>';
+    }
+    h+='</div></div></div>';
+  });
+  lista.innerHTML=h;
+}
+
+// ABRIR CLIENTE
+function abrirCli(id){
+  RT=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  var c=(RT.cl||[]).find(function(x){return x.id===id;});
+  if(!c)return;
+  cliActivo=id;
+  el('m-nombre').textContent=c.nombre;
+  el('m-prod').textContent=(c.prod||'–')+(c.hora?' · 🕐 '+c.hora:'');
+  el('m-precio').textContent=fmt(c.precio||0);
+  el('m-cobrar').textContent=fmt(c.cobrar||0);
+  el('m-dir').textContent=c.dir?'📍 '+c.dir:'';
+  el('m-dist').textContent=c.dist?'🏙️ '+c.dist:'';
+  el('m-preview').textContent=getMsgDefault(c);
+  el('qr-panel').style.display='none';
+  el('bib-panel').style.display='none';
+  abrirModal('modal-cli');
+}
+
+// ACCIONES CLIENTE
+function waCliente(){
+  var c=getCli();if(!c)return;
+  var tel=(c.cel||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  if(tel.startsWith('51')&&tel.length>9)tel=tel.slice(2);
+  if(!tel){alert('Este cliente no tiene número');return;}
+  window.open('https://wa.me/51'+tel+'?text='+encodeURIComponent(getMsgDefault(c)),'_blank');
+}
+function qrCliente(){
+  var qp=el('qr-panel');
+  var bp=el('bib-panel');
+  if(bp)bp.style.display='none';
+  var isOpen=qp.style.display!=='none';
+  qp.style.display=isOpen?'none':'block';
+  if(!isOpen)cargarQRModal('yape');
+}
+function bibCliente(){
+  var bp=el('bib-panel');
+  var qp=el('qr-panel');
+  if(qp)qp.style.display='none';
+  var isOpen=bp.style.display!=='none';
+  bp.style.display=isOpen?'none':'block';
+  if(!isOpen)renderBibSel();
+}
+function getCli(){
+  RT=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  return (RT.cl||[]).find(function(x){return x.id===cliActivo;});
+}
+function copiarMensaje(){
+  var c=getCli();if(!c)return;
+  var msg=getMsgDefault(c);
+  if(navigator.clipboard){navigator.clipboard.writeText(msg).then(function(){showToast('✅ Mensaje copiado');});}
+  else{var ta=document.createElement('textarea');ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('✅ Copiado');}
+}
+
+// ESTADO
+function setEstado(st){
+  RT=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  var c=(RT.cl||[]).find(function(x){return x.id===cliActivo;});
+  if(!c)return;
+  c.st=st;
+  c.hora=st!=='pendiente'?new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}):'';
+  svRT();cerrarModal('modal-cli');render();
+  showToast('✅ Estado: '+estLabel(st));
+}
+
+// QR
+function togQRTipo(tipo){
+  qrTipoActivo=tipo;
+  var by=el('qr-btn-y'),bp=el('qr-btn-p');
+  if(tipo==='yape'){by.style.background='rgba(155,89,182,0.2)';by.style.borderColor='#9b59b6';by.style.color='#c39bd3';bp.style.background='var(--s2)';bp.style.borderColor='var(--border)';bp.style.color='var(--muted)';}
+  else{bp.style.background='rgba(0,180,216,0.2)';bp.style.borderColor='#00b4d8';bp.style.color='#00b4d8';by.style.background='var(--s2)';by.style.borderColor='var(--border)';by.style.color='var(--muted)';}
+  cargarQRModal(tipo);
+}
+function cargarQRModal(tipo){
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  var src=rd['qr_'+tipo];
+  var num=tipo==='yape'?(rd.myYape||C.config.yape||''):(rd.empYape||C.config.plin||'');
+  var nom=rd['qr_'+tipo+'_nom']||'';
+  var img=el('qr-img-modal');var ph=el('qr-ph-modal');
+  if(src){img.src=src;img.style.display='block';ph.style.display='none';}
+  else{img.style.display='none';ph.style.display='flex';}
+  el('qr-num-modal').textContent=num||'';
+  el('qr-nom-modal').textContent=nom||'';
+}
+function ampQRModal(){
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  var src=rd['qr_'+qrTipoActivo];if(!src)return;
+  var num=qrTipoActivo==='yape'?(rd.myYape||''):(rd.empYape||'');
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)';
+  ov.onclick=function(){ov.remove();};
+  ov.innerHTML='<div style="background:#fff;border-radius:20px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,0.5)"><img src="'+src+'" style="width:260px;height:260px;object-fit:contain;display:block;border-radius:10px"></div>'+(num?'<div style="font-family:Bebas Neue,sans-serif;font-size:1.5rem;color:#fff;letter-spacing:3px;margin-top:16px">'+num+'</div>':'')+'<div style="color:rgba(255,255,255,0.5);font-size:0.72rem;margin-top:12px">Toca para cerrar</div>';
+  document.body.appendChild(ov);
+}
+function compartirQRCliente(){
+  var c=getCli();if(!c)return;
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  var src=rd['qr_'+qrTipoActivo];
+  var num=qrTipoActivo==='yape'?(rd.myYape||''):(rd.empYape||'');
+  var tipo=qrTipoActivo==='yape'?'Yape':'Plin';
+  var msg='Hola '+((c.nombre||'').split(' ')[0])+'!\n\nTe comparto mi '+tipo+' para el pago de S/'+( c.cobrar||0)+':\n'+(num?tipo+': '+num+'\n':'')+'Tu pedido: '+(c.prod||'')+'\n\nEscanea el QR para pagar ✅';
+  if(src){
+    fetch(src).then(function(r){return r.blob();}).then(function(blob){
+      var file=new File([blob],'QR_'+tipo+'.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file],text:msg,title:'QR '+tipo+' - RiderTrack'}).catch(function(){window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
+      }else{window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
+    });
+  }else{window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
+}
+
+// BIBLIOTECA SELECTOR en modal cliente
+function renderBibSel(){
+  var lista=el('bib-sel-lista');if(!lista)return;
+  if(!C.bib.length){lista.innerHTML='<div style="font-size:0.75rem;color:var(--muted)">Sin plantillas — ve a la pestaña Mensajes</div>';return;}
+  var h='';
+  C.bib.forEach(function(b){
+    h+='<div onclick="usarBib('+b.id+')" style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r-xs);padding:10px;margin-bottom:6px;cursor:pointer;transition:all 0.18s">';
+    h+='<div style="font-weight:700;font-size:0.82rem;margin-bottom:3px">'+b.nombre+'</div>';
+    h+='<div style="font-size:0.68rem;color:var(--muted)">'+b.msg.substring(0,60)+'...</div>';
+    h+='</div>';
+  });
+  lista.innerHTML=h;
+}
+function usarBib(id){
+  var c=getCli();if(!c)return;
+  var bib=C.bib.find(function(b){return b.id===id;});if(!bib)return;
+  var msg=aplicarTags(bib.msg,c);
+  el('m-preview').textContent=msg;
+  el('bib-panel').style.display='none';
+  var tel=(c.cel||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  if(tel.startsWith('51')&&tel.length>9)tel=tel.slice(2);
+  if(tel)window.open('https://wa.me/51'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  else{if(navigator.clipboard)navigator.clipboard.writeText(msg);showToast('✅ Mensaje copiado — cliente sin número');}
+}
+
+// MODAL HELPERS
+function abrirModal(id){el(id).classList.add('open');}
+function cerrarModal(id){el(id).classList.remove('open');}
+
+// BIBLIOTECA
+function insTag(t){var ta=el('bib-msg');if(!ta)return;var s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.substring(0,s)+t+ta.value.substring(e);ta.focus();ta.selectionStart=ta.selectionEnd=s+t.length;}
+function insTagMasivo(t){var ta=el('masivo-msg');if(!ta)return;var s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.substring(0,s)+t+ta.value.substring(e);ta.focus();ta.selectionStart=ta.selectionEnd=s+t.length;}
+function guardarBib(){
+  var n=el('bib-nombre').value.trim();var m=el('bib-msg').value.trim();
+  if(!n||!m){alert('Completa nombre y mensaje');return;}
+  C.bib.push({id:Date.now(),nombre:n,msg:m});
+  el('bib-nombre').value='';el('bib-msg').value='';
+  svC();rBib();showToast('✅ Plantilla guardada');
+}
+function elimBib(id){if(!confirm('¿Eliminar plantilla?'))return;C.bib=C.bib.filter(function(b){return b.id!==id;});svC();rBib();}
+function rBib(){
+  var l=el('lista-bib');if(!l)return;
+  if(!C.bib.length){l.innerHTML='<div class="empty"><div class="ei">📋</div>Sin plantillas aun</div>';return;}
+  var h='';
+  C.bib.forEach(function(b,i){
+    h+='<div class="bib-item" style="animation-delay:'+(i*0.05)+'s">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+    h+='<div style="font-weight:700;font-size:0.85rem">'+b.nombre+'</div>';
+    h+='<button onclick="elimBib('+b.id+')" class="sm">✕</button></div>';
+    h+='<div style="font-size:0.7rem;color:var(--muted);line-height:1.4;font-style:italic">"'+b.msg.substring(0,80)+(b.msg.length>80?'...':'')+'"</div>';
+    h+='</div>';
+  });
+  l.innerHTML=h;
+}
+
+// MASIVO
+var masivSel=new Set();
+function rMasivo(){
+  var cl=RT.cl||[];var l=el('lista-masivo');if(!l)return;
+  if(!cl.length){l.innerHTML='<div class="empty"><div class="ei">📲</div>Sin clientes</div>';el('masivo-actions').style.display='none';return;}
+  var h='';
+  cl.forEach(function(c){
+    var tel=(c.cel||'').replace(/\s/g,'').replace(/[^0-9]/g,'');if(tel.startsWith('51')&&tel.length>9)tel=tel.slice(2);
+    var sel=masivSel.has(c.id);
+    h+='<div class="check-cli'+(sel?' sel':'')+'" onclick="togMasiv('+c.id+')">';
+    h+='<div style="width:20px;height:20px;border-radius:50%;border:2px solid '+(sel?'var(--ac)':'var(--border)')+';background:'+(sel?'var(--ac)':'none')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.18s">'+(sel?'<span style="color:#fff;font-size:0.7rem">✓</span>':'')+'</div>';
+    h+='<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.nombre+'</div>';
+    h+='<div style="font-size:0.65rem;color:var(--muted)">'+(c.prod||'–')+(tel?' · 📞'+tel:' · Sin número')+'</div></div>';
+    h+='<span class="est '+estClass(c.st)+'">'+estLabel(c.st)+'</span>';
+    h+='</div>';
+  });
+  l.innerHTML=h;
+  actualizarMasivo();
+}
+function togMasiv(id){if(masivSel.has(id))masivSel.delete(id);else masivSel.add(id);rMasivo();}
+function selTodosM(){masivSel.clear();(RT.cl||[]).forEach(function(c){if(c.cel)masivSel.add(c.id);});rMasivo();}
+function deselTodosM(){masivSel.clear();rMasivo();}
+function actualizarMasivo(){
+  var n=masivSel.size;el('masivo-count').textContent=n;
+  el('masivo-actions').style.display=n>0?'block':'none';
+}
+function enviarMasivo(){
+  var msg=el('masivo-msg').value.trim();
+  if(!msg){alert('Escribe un mensaje primero');return;}
+  var cl=(RT.cl||[]).filter(function(c){return masivSel.has(c.id);});
+  if(!cl.length){alert('Selecciona al menos un cliente');return;}
+  var idx=0;
+  function enviarSiguiente(){
+    if(idx>=cl.length){showToast('✅ Mensajes enviados');return;}
+    var c=cl[idx++];
+    var tel=(c.cel||'').replace(/\s/g,'').replace(/[^0-9]/g,'');if(tel.startsWith('51')&&tel.length>9)tel=tel.slice(2);
+    if(!tel){enviarSiguiente();return;}
+    var m=aplicarTags(msg,c);
+    window.open('https://wa.me/51'+tel+'?text='+encodeURIComponent(m),'_blank');
+    setTimeout(enviarSiguiente,1500);
+  }
+  if(!confirm('¿Enviar a '+cl.length+' cliente(s)?'))return;
+  enviarSiguiente();
+}
+
+// CONFIG
+function cargarConfig(){
+  el('cfg-yape').value=C.config.yape||'';
+  el('cfg-plin').value=C.config.plin||'';
+  el('cfg-nombre').value=C.config.nombre||'Rudy';
+  el('cfg-hi').value=C.config.hi||'09:00';
+  el('cfg-hf').value=C.config.hf||'13:00';
+}
+function guardarConfig(){
+  C.config.yape=el('cfg-yape').value.trim();
+  C.config.plin=el('cfg-plin').value.trim();
+  C.config.nombre=el('cfg-nombre').value.trim();
+  C.config.hi=el('cfg-hi').value;
+  C.config.hf=el('cfg-hf').value;
+  svC();showToast('✅ Configuración guardada');
+}
+
+// TOAST
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:11px 20px;color:var(--text);font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:var(--shadow);white-space:nowrap;animation:popIn 0.3s ease';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2500);
+}
+
+// RENDER
+function render(){rClientes();rBib();rMasivo();}
+render();
+</script>
+</body>
+</html>
