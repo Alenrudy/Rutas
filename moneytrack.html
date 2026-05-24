@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1623">
+<meta name="mobile-web-app-capable" content="yes">
+<title>MoneyTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+@keyframes slideUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(0.88)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.4}100%{transform:scale(4);opacity:0}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes celebrar{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,0.22);animation:ripple 0.55s linear;pointer-events:none}
+:root{
+  --bg:#080c14;--s1:#0f1623;--s2:#161e2e;--s3:#1c2740;
+  --border:#1e3050;--ac:#4f8ef7;--ac2:#2563eb;
+  --acg:linear-gradient(135deg,#2563eb,#4f8ef7);
+  --green:#22c55e;--red:#f43f5e;--warn:#f59e0b;--purple:#a855f7;
+  --text:#e8f0fe;--muted:#5878a0;--mu2:#1e3050;
+  --shadow:0 4px 24px rgba(0,0,0,0.45);--shadow-sm:0 2px 10px rgba(0,0,0,0.3);
+  --r:16px;--r-sm:10px;--r-xs:8px;
+}
+body.L{
+  --bg:#f0f4ff;--s1:#ffffff;--s2:#f5f7ff;--s3:#eaefff;
+  --border:#dde5f5;--text:#1a2a4a;--muted:#7a90b8;--mu2:#c8d8f0;
+  --shadow:0 4px 24px rgba(80,120,200,0.10);--shadow-sm:0 2px 10px rgba(80,120,200,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;display:flex;flex-direction:column}
+/* TOPBAR */
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 14px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-sm);z-index:10}
+.tit{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--ac)}
+.sub{font-size:0.6rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;margin-top:1px}
+.back{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--text);width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;text-decoration:none;transition:all 0.18s;flex-shrink:0;cursor:pointer}
+.back:active{transform:scale(0.88)}
+/* NAV */
+.nav{display:flex;background:var(--s1);border-top:1px solid var(--border);flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.2)}
+.nb{flex:1;padding:8px 4px 6px;background:none;border:none;border-top:2.5px solid transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.55rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.2s;position:relative;overflow:hidden}
+.nb i{font-size:1.05rem;display:block;margin-bottom:2px}
+.nb.on{color:var(--ac);border-top-color:var(--ac)}
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{display:none;height:100%;overflow-y:auto;padding:13px 13px 28px;animation:fadeIn 0.2s ease;scrollbar-width:none}
+.page::-webkit-scrollbar{display:none}
+.page.on{display:block}
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.ct{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1.5px;color:var(--ac);margin-bottom:2px}
+.ps{font-size:0.7rem;color:var(--muted);margin-bottom:12px;font-family:'Barlow Condensed',sans-serif}
+/* INPUTS */
+input,select,textarea{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r-xs);padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.18s,box-shadow 0.18s}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(79,142,247,0.12)}
+input::placeholder,textarea::placeholder{color:var(--mu2)}
+.ig{margin-bottom:9px}
+.ig label{font-size:0.65rem;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700}
+/* BOTONES */
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r-sm);font-family:'Bebas Neue',sans-serif;font-size:0.92rem;cursor:pointer;letter-spacing:0.8px;position:relative;overflow:hidden;transition:transform 0.15s,opacity 0.15s;min-height:44px}
+.btn:active{transform:scale(0.965);opacity:0.88}
+.bg{background:var(--acg);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,0.3)}
+.bgr{background:var(--s2);color:var(--text);border:1.5px solid var(--border);font-family:'Barlow',sans-serif;font-size:0.82rem}
+.brd{background:none;border:1.5px solid rgba(244,63,94,0.35);color:var(--red);font-family:'Barlow',sans-serif;font-size:0.75rem;padding:10px}
+.bgreen{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;box-shadow:0 4px 14px rgba(34,197,94,0.3)}
+.sm{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.6rem;padding:3px 9px;cursor:pointer;font-family:'Barlow',sans-serif;transition:all 0.18s}
+.sm:active{transform:scale(0.9)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.dv{height:1px;background:var(--border);margin:10px 0}
+/* RESUMEN */
+.sbox{background:var(--s2);border-radius:var(--r-sm);padding:12px;text-align:center;border:1px solid var(--border)}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1}
+.sl{font-size:0.57rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px}
+/* PROGRESS */
+.prog{background:var(--s3);border-radius:99px;height:9px;overflow:hidden;margin:8px 0 4px}
+.pf{height:100%;border-radius:99px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1)}
+/* META CARD */
+.mc{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);animation:slideUp 0.22s ease both;position:relative;overflow:hidden}
+.mc.cumplida{border-color:rgba(34,197,94,0.5);background:rgba(34,197,94,0.04)}
+.mc.cerca{border-color:rgba(245,158,11,0.4)}
+.mc-icon{font-size:2rem;margin-bottom:6px}
+.mc-nombre{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px}
+.mc-km{font-size:0.62rem;color:var(--muted);margin-top:2px}
+/* ABONO ITEM */
+.abono{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--s2);border-radius:var(--r-xs);margin-bottom:5px;border:1px solid var(--border);animation:slideUp 0.18s ease both}
+/* EMPTY */
+.empty{text-align:center;padding:28px 16px;color:var(--muted);font-size:0.8rem}
+.empty .ei{font-size:2.2rem;margin-bottom:8px;display:block;opacity:0.5}
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:3000;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.modal-ov.open{display:flex}
+.modal{background:var(--s1);border-radius:24px 24px 0 0;padding:20px 18px 32px;width:100%;max-width:440px;border-top:1px solid var(--border);box-shadow:0 -8px 40px rgba(0,0,0,0.5);animation:slideUp 0.28s ease;max-height:88vh;overflow-y:auto}
+/* EMOJIS GRID */
+.emojis{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:10px}
+.ej{font-size:1.3rem;text-align:center;padding:6px;border-radius:8px;cursor:pointer;transition:all 0.15s;border:2px solid transparent}
+.ej.on{border-color:var(--ac);background:rgba(79,142,247,0.12)}
+.ej:active{transform:scale(0.88)}
+/* CANVAS */
+canvas{border-radius:var(--r-xs);width:100%!important}
+/* STIT */
+.stit{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:12px 0 7px;font-family:'Barlow Condensed',sans-serif;display:flex;align-items:center;gap:6px}
+.stit::after{content:'';flex:1;height:1px;background:var(--border)}
+/* BADGE CUMPLIDA */
+.badge-ok{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:1px;padding:3px 10px;border-radius:99px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="back" id="backBtn">&#8592;</a>
+  <div style="flex:1;margin:0 12px">
+    <div class="tit">&#128176; MONEYTRACK</div>
+    <div class="sub" id="topFecha"></div>
+  </div>
+  <button onclick="abrirNuevaMeta()" style="background:var(--acg);border:none;border-radius:var(--r-xs);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:0.8rem;padding:7px 12px;cursor:pointer;letter-spacing:1px;box-shadow:0 3px 10px rgba(37,99,235,0.3)">&#43; META</button>
+</div>
+<nav class="nav">
+  <button class="nb on" onclick="goTo('metas',this)"><i>&#127919;</i>METAS</button>
+  <button class="nb" onclick="goTo('resumen',this)"><i>&#128202;</i>RESUMEN</button>
+  <button class="nb" onclick="goTo('historial',this)"><i>&#128218;</i>HISTORIAL</button>
+</nav>
+<div class="pages">
+
+<!-- METAS -->
+<div class="page on" id="page-metas">
+  <div class="pt">Mis Metas</div>
+  <div class="ps">Toca una meta para abonar</div>
+  <!-- RESUMEN RÁPIDO -->
+  <div class="g2" style="margin-bottom:12px">
+    <div class="sbox"><div class="sv" style="color:var(--green)" id="r-total">S/ 0</div><div class="sl">Total ahorrado</div></div>
+    <div class="sbox"><div class="sv" id="r-metas">0</div><div class="sl">Metas activas</div></div>
+  </div>
+  <div id="lista-metas">
+    <div class="empty"><div class="ei">&#127919;</div>No tienes metas aún<br><br><button class="btn bg" onclick="abrirNuevaMeta()" style="width:auto;padding:10px 24px">&#43; Crear primera meta</button></div>
+  </div>
+</div>
+
+<!-- RESUMEN -->
+<div class="page" id="page-resumen">
+  <div class="pt">Resumen</div>
+  <div class="ps">Vista general de tus ahorros</div>
+  <div class="g2" style="margin-bottom:10px">
+    <div class="sbox"><div class="sv" style="color:var(--green)" id="res-total">S/ 0</div><div class="sl">Total ahorrado</div></div>
+    <div class="sbox"><div class="sv" style="color:var(--ac)" id="res-metas">0</div><div class="sl">Metas</div></div>
+    <div class="sbox"><div class="sv" style="color:var(--warn)" id="res-cumplidas">0</div><div class="sl">Cumplidas</div></div>
+    <div class="sbox"><div class="sv" style="color:var(--muted)" id="res-faltan">S/ 0</div><div class="sl">Faltan</div></div>
+  </div>
+  <div class="card">
+    <div class="ct"><span style="color:var(--ac)">&#128202;</span> Progreso de todas las metas</div>
+    <canvas id="grafica-metas" height="160"></canvas>
+  </div>
+  <div id="res-lista"></div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="page" id="page-historial">
+  <div class="pt">Historial</div>
+  <div class="ps">Todos tus abonos</div>
+  <div class="card">
+    <div class="ct"><span style="color:var(--ac)">&#128203;</span> Últimos abonos <button class="sm" onclick="if(confirm('¿Limpiar historial completo?')){M.historial=[];sv();render();}">&#128465;&#65039; Limpiar</button></div>
+    <div id="lista-hist"><div class="empty"><div class="ei">&#128218;</div>Sin abonos aún</div></div>
+  </div>
+</div>
+
+</div><!-- end pages -->
+
+<!-- MODAL: NUEVA META -->
+<div class="modal-ov" id="modal-nueva" onclick="if(event.target===this)cerrarModal('modal-nueva')">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;color:var(--ac)">&#43; NUEVA META</div>
+      <button onclick="cerrarModal('modal-nueva')" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text);font-size:0.9rem">✕</button>
+    </div>
+    <div class="ig"><label>&#127919; Nombre de la meta</label><input type="text" id="new-nombre" placeholder="Ej: Moto Honda GL"></div>
+    <div class="ig"><label>&#128176; Monto objetivo (S/)</label><input type="number" id="new-monto" placeholder="Ej: 4000" inputmode="decimal"></div>
+    <div class="ig"><label>&#128197; Fecha límite (opcional)</label><input type="date" id="new-fecha"></div>
+    <div class="ig"><label>Ícono</label>
+      <div class="emojis" id="emoji-grid"></div>
+    </div>
+    <div class="ig"><label>&#128172; Nota (opcional)</label><input type="text" id="new-nota" placeholder="Para qué es esta meta..."></div>
+    <button class="btn bg" onclick="crearMeta()">&#127919; CREAR META</button>
+  </div>
+</div>
+
+<!-- MODAL: ABONAR -->
+<div class="modal-ov" id="modal-abonar" onclick="if(event.target===this)cerrarModal('modal-abonar')">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;color:var(--ac)" id="abonar-title">ABONAR</div>
+      <button onclick="cerrarModal('modal-abonar')" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text);font-size:0.9rem">✕</button>
+    </div>
+    <!-- Info meta activa -->
+    <div style="background:var(--s2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:0.72rem;color:var(--muted)">Ahorrado</div>
+        <div style="font-size:0.72rem;color:var(--muted)">Objetivo</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green)" id="ab-ahorrado">S/ 0</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--muted)" id="ab-objetivo">S/ 0</div>
+      </div>
+      <div class="prog"><div class="pf" id="ab-prog" style="width:0%;background:var(--acg)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted)">
+        <span id="ab-pct">0%</span><span id="ab-faltan">Faltan S/ 0</span>
+      </div>
+    </div>
+    <div class="ig"><label>&#128176; Monto a abonar (S/)</label><input type="number" id="ab-monto" placeholder="0.00" inputmode="decimal"></div>
+    <div class="ig"><label>&#128172; Nota del abono</label><input type="text" id="ab-nota" placeholder="Ej: Semana del 20 de mayo"></div>
+    <!-- Abonos rápidos -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button onclick="quickAbono(50)" class="sm" style="padding:6px 12px;font-size:0.72rem">+S/50</button>
+      <button onclick="quickAbono(100)" class="sm" style="padding:6px 12px;font-size:0.72rem">+S/100</button>
+      <button onclick="quickAbono(200)" class="sm" style="padding:6px 12px;font-size:0.72rem">+S/200</button>
+      <button onclick="quickAbono(500)" class="sm" style="padding:6px 12px;font-size:0.72rem">+S/500</button>
+    </div>
+    <button class="btn bgreen" onclick="confirmarAbono()">&#128176; ABONAR</button>
+    <div class="dv"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700">Historial de abonos</div>
+      <button class="sm" onclick="editarMeta()">&#9999;&#65039; Editar meta</button>
+    </div>
+    <div id="ab-hist"></div>
+    <button class="btn brd" onclick="eliminarMeta()" style="margin-top:8px">&#128465;&#65039; Eliminar esta meta</button>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR META -->
+<div class="modal-ov" id="modal-editar" onclick="if(event.target===this)cerrarModal('modal-editar')">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;color:var(--ac)">&#9999;&#65039; EDITAR META</div>
+      <button onclick="cerrarModal('modal-editar')" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text);font-size:0.9rem">✕</button>
+    </div>
+    <div class="ig"><label>Nombre</label><input type="text" id="ed-nombre" placeholder="Nombre de la meta"></div>
+    <div class="ig"><label>Monto objetivo (S/)</label><input type="number" id="ed-monto" placeholder="0.00" inputmode="decimal"></div>
+    <div class="ig"><label>Fecha límite</label><input type="date" id="ed-fecha"></div>
+    <div class="ig"><label>Ícono</label><div class="emojis" id="emoji-grid-ed"></div></div>
+    <div class="ig"><label>Nota</label><input type="text" id="ed-nota" placeholder="Para qué es..."></div>
+    <button class="btn bg" onclick="guardarEdicion()">&#128190; GUARDAR CAMBIOS</button>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+var M=JSON.parse(localStorage.getItem('moneytrack')||'{}');
+if(!M.metas)M.metas=[];
+if(!M.historial)M.historial=[];
+
+var EMOJIS=['🏍️','🚗','🏠','✈️','💻','📱','🎓','💪','🛒','🎮','🌴','💊','👔','📷','🎵','⌚','🏋️','🐕','👶','💍','🏖️','🛵','❄️','🫧','🎁','💰','🏆','⭐','🔑','🎯'];
+var metaActiva=null;
+var emojiSel=EMOJIS[0];
+var emojiSelEd=EMOJIS[0];
+
+function sv(){try{localStorage.setItem('moneytrack',JSON.stringify(M));}catch(e){}}
+function el(id){return document.getElementById(id);}
+function fmt(n){return 'S/ '+parseFloat(n||0).toFixed(2);}
+function fmts(n){return 'S/ '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+// RIPPLE
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.btn,.nb,.sm,.mc,.ej,.back');if(!b)return;
+  var r=document.createElement('span');var rect=b.getBoundingClientRect();
+  var sz=Math.max(rect.width,rect.height)*2;r.className='rip';
+  r.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(e.clientX-rect.left-sz/2)+'px;top:'+(e.clientY-rect.top-sz/2)+'px';
+  b.appendChild(r);setTimeout(function(){r.remove();},600);
+});
+
+// BACK
+var bb=el('backBtn');
+if(bb){bb.addEventListener('click',function(e){e.preventDefault();if(window.history.length>1)window.history.back();else window.location.href='index.html';});}
+
+// INIT
+
+// Sync tema desde RiderTrack
+(function(){
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  if(rd.light)document.body.classList.add('L');
+  if(rd.ac)document.documentElement.style.setProperty('--ac',rd.ac);
+  if(rd.ac2)document.documentElement.style.setProperty('--ac2',rd.ac2);
+})();
+el('topFecha').textContent=new Date().toLocaleDateString('es-PE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+construirEmojiGrid('emoji-grid',false);
+construirEmojiGrid('emoji-grid-ed',true);
+
+// TABS
+function goTo(p,b){
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(x){x.classList.remove('on');});
+  el('page-'+p).classList.add('on');if(b)b.classList.add('on');
+  render();
+}
+
+// EMOJI GRID
+function construirEmojiGrid(id,esEd){
+  var g=el(id);if(!g)return;
+  g.innerHTML='';
+  EMOJIS.forEach(function(em,i){
+    var d=document.createElement('div');
+    d.className='ej'+(i===0?' on':'');
+    d.textContent=em;
+    d.onclick=function(){
+      g.querySelectorAll('.ej').forEach(function(x){x.classList.remove('on');});
+      d.classList.add('on');
+      if(esEd)emojiSelEd=em;else emojiSel=em;
+    };
+    g.appendChild(d);
+  });
+}
+function setEmojiGrid(id,em,esEd){
+  var g=el(id);if(!g)return;
+  g.querySelectorAll('.ej').forEach(function(d){
+    var isOn=d.textContent===em;
+    d.classList.toggle('on',isOn);
+    if(isOn){if(esEd)emojiSelEd=em;else emojiSel=em;}
+  });
+}
+
+// MODAL
+function abrirModal(id){el(id).classList.add('open');}
+function cerrarModal(id){el(id).classList.remove('open');}
+
+// NUEVA META
+function abrirNuevaMeta(){
+  el('new-nombre').value='';el('new-monto').value='';
+  el('new-fecha').value='';el('new-nota').value='';
+  emojiSel=EMOJIS[0];construirEmojiGrid('emoji-grid',false);
+  abrirModal('modal-nueva');setTimeout(function(){el('new-nombre').focus();},300);
+}
+function crearMeta(){
+  var nom=el('new-nombre').value.trim();
+  var monto=parseFloat(el('new-monto').value)||0;
+  if(!nom){alert('Ingresa un nombre para la meta');return;}
+  if(!monto||monto<=0){alert('Ingresa el monto objetivo');return;}
+  var meta={
+    id:Date.now(),
+    nombre:nom,objetivo:monto,icono:emojiSel,
+    abonos:[],nota:el('new-nota').value.trim(),
+    fecha:el('new-fecha').value||'',
+    creadoEn:new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'})
+  };
+  M.metas.push(meta);sv();cerrarModal('modal-nueva');render();
+  showToast('✅ Meta creada: '+nom);
+}
+
+// ABONAR
+function abrirAbonar(id){
+  metaActiva=id;
+  var meta=M.metas.find(function(m){return m.id===id;});
+  if(!meta)return;
+  el('abonar-title').textContent=meta.icono+' '+meta.nombre.toUpperCase();
+  el('ab-monto').value='';el('ab-nota').value='';
+  refrescarModalAbono(meta);
+  abrirModal('modal-abonar');
+  setTimeout(function(){el('ab-monto').focus();},300);
+}
+function refrescarModalAbono(meta){
+  var tot=meta.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+  var pct=Math.min(tot/meta.objetivo*100,100);
+  var falta=Math.max(0,meta.objetivo-tot);
+  el('ab-ahorrado').textContent=fmt(tot);
+  el('ab-objetivo').textContent=fmt(meta.objetivo);
+  el('ab-prog').style.width=pct+'%';
+  el('ab-prog').style.background=pct>=100?'linear-gradient(135deg,#15803d,#22c55e)':'linear-gradient(135deg,#2563eb,#4f8ef7)';
+  el('ab-pct').textContent=Math.round(pct)+'%';
+  el('ab-faltan').textContent=pct>=100?'¡META CUMPLIDA! 🏆':'Faltan '+fmt(falta);
+  // Historial
+  var h='';
+  if(!meta.abonos.length){h='<div class="empty" style="padding:14px"><div class="ei" style="font-size:1.5rem">📋</div>Sin abonos aún</div>';}
+  else{
+    meta.abonos.slice().reverse().forEach(function(a,i){
+      h+='<div class="abono" style="animation-delay:'+(i*0.04)+'s">';
+      h+='<div><div style="font-size:0.82rem;font-weight:700;color:var(--green)">'+fmt(a.monto)+'</div>';
+      if(a.nota)h+='<div style="font-size:0.65rem;color:var(--muted)">'+a.nota+'</div>';
+      h+='</div>';
+      h+='<div style="display:flex;align-items:center;gap:8px">';
+      h+='<div style="font-size:0.65rem;color:var(--muted)">'+a.fecha+'</div>';
+      h+='<button onclick="eliminarAbono('+a.id+')" style="background:none;border:1px solid rgba(244,63,94,0.3);border-radius:5px;padding:2px 7px;color:var(--red);font-size:0.6rem;cursor:pointer">✕</button>';
+      h+='</div></div>';
+    });
+  }
+  el('ab-hist').innerHTML=h;
+}
+function quickAbono(n){el('ab-monto').value=n;}
+function confirmarAbono(){
+  var monto=parseFloat(el('ab-monto').value)||0;
+  if(!monto||monto<=0){alert('Ingresa un monto válido');return;}
+  var meta=M.metas.find(function(m){return m.id===metaActiva;});
+  if(!meta)return;
+  var abono={id:Date.now(),monto:monto,nota:el('ab-nota').value.trim(),fecha:new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'})};
+  meta.abonos.push(abono);
+  M.historial.unshift({metaId:meta.id,metaNombre:meta.nombre,metaIcono:meta.icono,...abono});
+  if(M.historial.length>200)M.historial.pop();
+  sv();
+  el('ab-monto').value='';el('ab-nota').value='';
+  refrescarModalAbono(meta);
+  render();
+  var tot=meta.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+  if(tot>=meta.objetivo){showCelebracion(meta);}
+  else{showToast('✅ +'+fmt(monto)+' abonado a '+meta.nombre);}
+}
+function eliminarAbono(id){
+  var meta=M.metas.find(function(m){return m.id===metaActiva;});
+  if(!meta||!confirm('¿Eliminar este abono?'))return;
+  meta.abonos=meta.abonos.filter(function(a){return a.id!==id;});
+  M.historial=M.historial.filter(function(h){return h.id!==id;});
+  sv();refrescarModalAbono(meta);render();
+}
+
+// EDITAR META
+function editarMeta(){
+  var meta=M.metas.find(function(m){return m.id===metaActiva;});
+  if(!meta)return;
+  el('ed-nombre').value=meta.nombre;
+  el('ed-monto').value=meta.objetivo;
+  el('ed-fecha').value=meta.fecha||'';
+  el('ed-nota').value=meta.nota||'';
+  emojiSelEd=meta.icono||EMOJIS[0];
+  construirEmojiGrid('emoji-grid-ed',true);
+  setEmojiGrid('emoji-grid-ed',emojiSelEd,true);
+  cerrarModal('modal-abonar');
+  abrirModal('modal-editar');
+}
+function guardarEdicion(){
+  var meta=M.metas.find(function(m){return m.id===metaActiva;});
+  if(!meta)return;
+  var nom=el('ed-nombre').value.trim();
+  var monto=parseFloat(el('ed-monto').value)||0;
+  if(!nom||!monto){alert('Completa nombre y monto');return;}
+  meta.nombre=nom;meta.objetivo=monto;meta.icono=emojiSelEd;
+  meta.fecha=el('ed-fecha').value||'';meta.nota=el('ed-nota').value.trim();
+  sv();cerrarModal('modal-editar');render();
+  showToast('✅ Meta actualizada');
+}
+
+// ELIMINAR META
+function eliminarMeta(){
+  var meta=M.metas.find(function(m){return m.id===metaActiva;});
+  if(!meta||!confirm('¿Eliminar la meta "'+meta.nombre+'"?\nSe perderán todos los abonos.'))return;
+  M.metas=M.metas.filter(function(m){return m.id!==metaActiva;});
+  M.historial=M.historial.filter(function(h){return h.metaId!==metaActiva;});
+  sv();cerrarModal('modal-abonar');render();
+  showToast('🗑️ Meta eliminada');
+}
+
+// PROYECCIÓN DE FECHA
+function proyFecha(meta){
+  if(!meta.abonos.length||meta.abonos.length<2)return'';
+  var tot=meta.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+  if(tot>=meta.objetivo)return'';
+  // Promedio semanal de los últimos abonos
+  var sorted=meta.abonos.slice().sort(function(a,b){return a.id-b.id;});
+  var primero=sorted[0].id;var ultimo=sorted[sorted.length-1].id;
+  var diasTranscurridos=Math.max(1,(ultimo-primero)/(1000*60*60*24));
+  var promDia=tot/Math.max(diasTranscurridos,1);
+  if(promDia<=0)return'';
+  var falta=meta.objetivo-tot;
+  var diasNecesarios=Math.ceil(falta/promDia);
+  var fechaEst=new Date();fechaEst.setDate(fechaEst.getDate()+diasNecesarios);
+  return 'Aprox. '+fechaEst.toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})+'  ('+diasNecesarios+' días)';
+}
+
+// CELEBRACIÓN
+function showCelebracion(meta){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer';
+  ov.onclick=function(){ov.remove();};
+  ov.innerHTML='<div style="text-align:center;animation:celebrar 0.6s ease infinite">'
+    +'<div style="font-size:5rem;margin-bottom:16px">'+meta.icono+'</div>'
+    +'<div style="font-family:Bebas Neue,sans-serif;font-size:2rem;color:#22c55e;letter-spacing:3px;margin-bottom:8px">META CUMPLIDA</div>'
+    +'<div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:8px">'+meta.nombre+'</div>'
+    +'<div style="font-family:Bebas Neue,sans-serif;font-size:1.5rem;color:#4f8ef7">'+fmt(meta.abonos.reduce(function(a,b){return a+(b.monto||0);},0))+'</div>'
+    +'<div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:20px">Toca para cerrar</div>'
+    +'</div>';
+  document.body.appendChild(ov);
+}
+
+// TOAST
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:11px 20px;color:var(--text);font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:var(--shadow);white-space:nowrap;animation:popIn 0.3s ease';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2500);
+}
+
+// RENDER
+function render(){
+  rMetas();rResumen();rHistorial();
+}
+function rMetas(){
+  var lista=el('lista-metas');if(!lista)return;
+  if(!M.metas.length){
+    lista.innerHTML='<div class="empty"><div class="ei">🎯</div>No tienes metas aún<br><br><button class="btn bg" onclick="abrirNuevaMeta()" style="width:auto;padding:10px 24px">+ Crear primera meta</button></div>';
+    el('r-total').textContent='S/ 0';el('r-metas').textContent='0';return;
+  }
+  var totalAhorrado=0;
+  var html='';
+  M.metas.forEach(function(meta,idx){
+    var tot=meta.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+    totalAhorrado+=tot;
+    var pct=Math.min(tot/meta.objetivo*100,100);
+    var falta=Math.max(0,meta.objetivo-tot);
+    var cumplida=tot>=meta.objetivo;
+    var cerca=!cumplida&&pct>=80;
+    var col=cumplida?'var(--green)':cerca?'var(--warn)':'var(--ac)';
+    var colProg=cumplida?'linear-gradient(135deg,#15803d,#22c55e)':cerca?'linear-gradient(135deg,#92400e,#f59e0b)':'linear-gradient(135deg,#2563eb,#4f8ef7)';
+    var proy=proyFecha(meta);
+    html+='<div class="mc'+(cumplida?' cumplida':cerca?' cerca':'')+'" onclick="abrirAbonar('+meta.id+')" style="animation-delay:'+(idx*0.06)+'s">';
+    if(cumplida)html+='<div class="badge-ok">✅ CUMPLIDA</div>';
+    html+='<div style="display:flex;align-items:flex-start;gap:10px">';
+    html+='<div style="font-size:2.2rem;flex-shrink:0">'+meta.icono+'</div>';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:2px">'+meta.nombre+'</div>';
+    if(meta.nota)html+='<div style="font-size:0.65rem;color:var(--muted);margin-bottom:4px">'+meta.nota+'</div>';
+    // Montos
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4px">';
+    html+='<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.5rem;color:'+col+'">'+fmt(tot)+'</div>';
+    html+='<div style="text-align:right"><div style="font-size:0.6rem;color:var(--muted)">de '+fmt(meta.objetivo)+'</div>';
+    if(!cumplida)html+='<div style="font-size:0.68rem;color:var(--muted)">Faltan '+fmt(falta)+'</div>';
+    html+='</div></div>';
+    // Barra
+    html+='<div class="prog"><div class="pf" style="width:'+pct+'%;background:'+colProg+'"></div></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-size:0.6rem;color:var(--muted)">';
+    html+='<span>'+Math.round(pct)+'%</span>';
+    if(meta.fecha)html+='<span>&#128197; '+meta.fecha+'</span>';
+    html+='</div>';
+    if(proy)html+='<div style="font-size:0.62rem;color:var(--muted);margin-top:4px">&#128336; Estimado: '+proy+'</div>';
+    html+='<div style="font-size:0.65rem;color:var(--ac);margin-top:6px;font-weight:700">'+meta.abonos.length+' abono'+(meta.abonos.length!==1?'s':'')+'  ·  Toca para abonar</div>';
+    html+='</div></div></div>';
+  });
+  lista.innerHTML=html;
+  el('r-total').textContent=fmt(totalAhorrado);
+  el('r-metas').textContent=M.metas.length;
+}
+
+function rResumen(){
+  var totalAhorrado=0,totalObjetivo=0,cumplidas=0;
+  M.metas.forEach(function(m){
+    var tot=m.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+    totalAhorrado+=tot;totalObjetivo+=m.objetivo;
+    if(tot>=m.objetivo)cumplidas++;
+  });
+  var faltan=Math.max(0,totalObjetivo-totalAhorrado);
+  if(el('res-total'))el('res-total').textContent=fmt(totalAhorrado);
+  if(el('res-metas'))el('res-metas').textContent=M.metas.length;
+  if(el('res-cumplidas'))el('res-cumplidas').textContent=cumplidas;
+  if(el('res-faltan'))el('res-faltan').textContent=fmt(faltan);
+  // Mini cards por meta
+  var rl=el('res-lista');
+  if(rl){
+    var h='<div class="stit">Detalle por meta</div>';
+    M.metas.forEach(function(m){
+      var tot=m.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+      var pct=Math.min(tot/m.objetivo*100,100);
+      var col=tot>=m.objetivo?'var(--green)':pct>=80?'var(--warn)':'var(--ac)';
+      h+='<div class="card" style="padding:11px;margin-bottom:7px">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      h+='<div style="font-weight:700;font-size:0.85rem">'+m.icono+' '+m.nombre+'</div>';
+      h+='<div style="font-family:\'Bebas Neue\',sans-serif;color:'+col+'">'+Math.round(pct)+'%</div>';
+      h+='</div>';
+      h+='<div class="prog" style="height:6px;margin:0 0 4px"><div class="pf" style="width:'+pct+'%;background:'+col+'"></div></div>';
+      h+='<div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted)">';
+      h+='<span>'+fmt(tot)+'</span><span>de '+fmt(m.objetivo)+'</span></div>';
+      h+='</div>';
+    });
+    rl.innerHTML=h||'<div class="empty"><div class="ei">📊</div>Sin metas</div>';
+  }
+  // Grafica
+  dibujarGrafica();
+}
+
+function rHistorial(){
+  var l=el('lista-hist');if(!l)return;
+  if(!M.historial.length){l.innerHTML='<div class="empty"><div class="ei">📋</div>Sin abonos aún</div>';return;}
+  var h='';
+  M.historial.slice(0,50).forEach(function(a,i){
+    h+='<div class="abono" style="animation-delay:'+(i*0.03)+'s">';
+    h+='<div><div style="font-size:0.82rem;font-weight:700;color:var(--green)">'+a.metaIcono+' '+fmt(a.monto)+'</div>';
+    h+='<div style="font-size:0.65rem;color:var(--ac)">'+a.metaNombre+'</div>';
+    if(a.nota)h+='<div style="font-size:0.62rem;color:var(--muted)">'+a.nota+'</div>';
+    h+='</div>';
+    h+='<div style="font-size:0.65rem;color:var(--muted)">'+a.fecha+'</div>';
+    h+='</div>';
+  });
+  l.innerHTML=h;
+}
+
+// GRÁFICA
+function dibujarGrafica(){
+  var cv=el('grafica-metas');if(!cv||!M.metas.length)return;
+  var ctx=cv.getContext('2d');
+  var W=cv.offsetWidth||300;cv.width=W;cv.height=160;
+  ctx.clearRect(0,0,W,160);
+  var colors=['rgba(79,142,247,0.85)','rgba(168,85,247,0.85)','rgba(249,115,22,0.85)','rgba(34,197,94,0.85)','rgba(96,165,250,0.85)','rgba(244,63,94,0.85)','rgba(245,158,11,0.85)','rgba(20,184,166,0.85)'];
+  var bh=18,gap=10,pad=14,labelW=80;
+  var metas=M.metas.slice(0,6);
+  if(!metas.length){ctx.fillStyle='rgba(88,120,160,0.5)';ctx.font='12px Barlow,sans-serif';ctx.textAlign='center';ctx.fillText('Crea metas para ver el progreso',W/2,80);return;}
+  metas.forEach(function(m,i){
+    var tot=m.abonos.reduce(function(a,b){return a+(b.monto||0);},0);
+    var pct=Math.min(tot/m.objetivo,1);
+    var y=pad+i*(bh+gap);
+    var bw=W-pad*2-labelW-35;
+    // Label
+    ctx.fillStyle='rgba(88,120,160,0.9)';ctx.font='11px Barlow,sans-serif';ctx.textAlign='left';
+    ctx.fillText(m.icono+' '+m.nombre.substring(0,10)+(m.nombre.length>10?'...':''),pad,y+bh-4);
+    // Fondo barra
+    ctx.fillStyle='rgba(28,39,64,0.9)';ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(pad+labelW,y,bw,bh,5);else ctx.rect(pad+labelW,y,bw,bh);ctx.fill();
+    // Barra progreso
+    if(pct>0){
+      ctx.fillStyle=pct>=1?'rgba(34,197,94,0.9)':colors[i%colors.length];
+      ctx.beginPath();
+      if(ctx.roundRect)ctx.roundRect(pad+labelW,y,Math.max(bw*pct,8),bh,5);else ctx.rect(pad+labelW,y,Math.max(bw*pct,8),bh);
+      ctx.fill();
+    }
+    // Pct
+    ctx.fillStyle='rgba(88,120,160,0.9)';ctx.font='10px Barlow,sans-serif';
+    ctx.fillText(Math.round(pct*100)+'%',pad+labelW+bw+6,y+bh-4);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
