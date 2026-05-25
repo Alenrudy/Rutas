@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A0B10">
+<meta name="mobile-web-app-capable" content="yes">
+<title>MotoTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@keyframes fadeInUp{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes slideUp{0%{opacity:0;transform:translateY(100%)}100%{opacity:1;transform:translateY(0)}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.35}100%{transform:scale(4.5);opacity:0}}
+@keyframes popIn{0%{opacity:0;transform:scale(0.88)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);animation:ripple 0.65s ease-out;pointer-events:none}
+
+:root{
+  --bg:#08090D;--bg2:#12131C;--bg3:#1A1B26;
+  --card:#12131C;--card2:#1A1B26;--card3:#22233A;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --ac:#F59E0B;--ac2:#FBBF24;
+  --acg:linear-gradient(135deg,#D97706,#F59E0B,#FBBF24);
+  --green:#10B981;--green2:#059669;
+  --greeng:linear-gradient(135deg,#059669,#10B981);
+  --red:#EF4444;--red2:#DC2626;
+  --orange:#F97316;--orange2:#EA580C;
+  --blue:#0EA5E9;--blue2:#38BDF8;
+  --purple:#A855F7;--purple2:#C084FC;
+  --text:#FFFFFF;--text2:rgba(255,255,255,0.7);--text3:rgba(255,255,255,0.4);
+  --shadow-sm:0 2px 12px rgba(0,0,0,0.35);
+  --shadow:0 8px 32px rgba(0,0,0,0.45);
+  --shadow-lg:0 20px 60px rgba(0,0,0,0.55);
+  --shadow-ac:0 8px 28px rgba(245,158,11,0.35);
+  --shadow-green:0 8px 24px rgba(16,185,129,0.3);
+  --r:20px;--r-sm:14px;--r-xs:10px;--r-pill:99px;
+  --ease:cubic-bezier(0.4,0,0.2,1);
+  /* compat */
+  --warn:var(--ac);--danger:var(--red);--muted:var(--text3);
+  --s1:var(--card);--s2:var(--card2);--s3:var(--card3);
+  --border-old:var(--border);
+}
+body.L{
+  --bg:#F4F5FA;--bg2:#FFFFFF;--bg3:#EAEDF5;
+  --card:#FFFFFF;--card2:#F4F5FA;--card3:#E8EAF5;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
+  --text:#1E1E24;--text2:rgba(30,30,36,0.65);--text3:rgba(30,30,36,0.38);
+  --shadow-sm:0 2px 12px rgba(0,0,0,0.06);
+  --shadow:0 8px 32px rgba(0,0,0,0.09);
+  --shadow-ac:0 8px 28px rgba(245,158,11,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;display:flex;flex-direction:column;font-size:15px}
+
+/* TOPBAR */
+.topbar{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px 16px;flex-shrink:0;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:var(--shadow-sm);z-index:10;position:relative;
+}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(245,158,11,0.4),rgba(251,191,36,0.2),transparent)}
+.tit{font-size:1.15rem;font-weight:800;letter-spacing:-0.3px;
+  background:var(--acg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-size:0.58rem;color:var(--text3);font-weight:500;margin-top:1px;letter-spacing:0.4px}
+.back{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r-xs);
+  color:var(--text);width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;cursor:pointer;transition:all 0.2s var(--ease);flex-shrink:0}
+.back:active{transform:scale(0.86);background:var(--card3)}
+
+/* NAV TABS */
+.tabs{
+  display:flex;background:var(--card2);border-radius:var(--r-sm);
+  padding:4px;gap:4px;margin-bottom:14px;
+  border:1px solid var(--border);
+}
+.tab{
+  flex:1;padding:10px 8px;border:none;border-radius:10px;
+  background:none;color:var(--text3);
+  font-family:'Outfit',sans-serif;font-size:0.65rem;font-weight:700;
+  cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;
+  transition:all 0.22s var(--ease);position:relative;overflow:hidden;
+}
+.tab.on{
+  background:var(--card);color:var(--ac);
+  box-shadow:var(--shadow-sm);
+}
+.tab.on::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--acg);border-radius:99px;
+}
+.tab:active{opacity:0.7}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:14px 16px 32px;scrollbar-width:none}
+.content::-webkit-scrollbar{display:none}
+
+/* CARDS */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;margin-bottom:12px;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+  animation:fadeInUp 0.3s var(--ease) both;
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
+.ct{font-size:0.62rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.3px;color:var(--text3);margin-bottom:12px;
+  display:flex;justify-content:space-between;align-items:center}
+
+/* INPUTS */
+input,select{
+  width:100%;background:var(--card2);border:1.5px solid var(--border);
+  border-radius:var(--r-xs);padding:12px 14px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:500;
+  outline:none;transition:all 0.22s var(--ease);
+}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(245,158,11,0.15)}
+input::placeholder{color:var(--text3)}
+.ig{margin-bottom:10px}
+.ig label{font-size:0.62rem;color:var(--text3);display:block;margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:0.6px;font-weight:700}
+
+/* BOTONES */
+.btn{
+  width:100%;padding:14px;border:none;border-radius:var(--r-sm);
+  font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:700;
+  cursor:pointer;letter-spacing:0.3px;position:relative;overflow:hidden;
+  transition:transform 0.18s var(--ease),box-shadow 0.18s;min-height:46px;
+}
+.btn:active{transform:scale(0.97)}
+.bg{background:var(--acg);color:#fff;box-shadow:var(--shadow-ac)}
+.bg:active{box-shadow:none}
+.bgr{background:var(--card2);color:var(--text2);border:1.5px solid var(--border2);font-size:0.85rem}
+.brd{background:transparent;border:1.5px solid rgba(239,68,68,0.35);color:var(--red);font-size:0.78rem;padding:11px}
+.sm{background:var(--card2);border:1px solid var(--border2);border-radius:8px;
+  color:var(--text3);font-size:0.6rem;padding:4px 10px;cursor:pointer;
+  font-family:'Outfit',sans-serif;font-weight:600;transition:all 0.18s;display:inline-block}
+.sm:active{transform:scale(0.9)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dv{height:1px;background:var(--border);margin:12px 0}
+
+/* HERO KM */
+.hero{
+  background:linear-gradient(135deg,#12131C 0%,#1A1400 50%,#0D0A00 100%);
+  color:#fff;border-radius:var(--r);padding:22px;
+  margin-bottom:14px;position:relative;overflow:hidden;
+  box-shadow:var(--shadow-lg);border:1px solid rgba(245,158,11,0.15);
+  animation:fadeInUp 0.3s var(--ease) both;
+}
+.hero::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,158,11,0.2) 0%,transparent 70%);
+}
+.hero::after{
+  content:'';position:absolute;bottom:-40px;left:-40px;
+  width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(249,115,22,0.1) 0%,transparent 70%);
+}
+.km-label{font-size:0.62rem;color:rgba(255,255,255,0.45);text-transform:uppercase;
+  letter-spacing:1.5px;margin-bottom:5px;font-weight:700}
+.km-big{font-size:3.5rem;font-weight:900;letter-spacing:-2px;line-height:1;
+  background:linear-gradient(135deg,#F59E0B,#FBBF24,#FDE68A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  position:relative;z-index:1}
+.km-unit{font-size:1.2rem;font-weight:600;color:rgba(255,255,255,0.5);margin-left:4px;vertical-align:middle}
+.km-hoy{font-size:1rem;font-weight:800;color:var(--green);margin-top:8px;letter-spacing:-0.3px}
+
+/* MANT CARDS */
+.mc{
+  border-radius:var(--r);padding:16px;border:1.5px solid var(--border);
+  background:var(--card);margin-bottom:10px;
+  animation:fadeInUp 0.28s var(--ease) both;
+  transition:border-color 0.3s;box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;
+}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
+.mc.ok{border-color:rgba(16,185,129,0.25);background:rgba(16,185,129,0.03)}
+.mc.urgente{border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.04)}
+.mc.vencido{border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.04)}
+.mc-icon{font-size:2rem;flex-shrink:0}
+.mc-title{font-weight:700;font-size:0.9rem;letter-spacing:-0.1px}
+.mc-sub{font-size:0.62rem;color:var(--text3);margin-top:2px;font-weight:500}
+.mc-km{font-size:1.4rem;font-weight:900;text-align:right;line-height:1;letter-spacing:-0.5px}
+.mc-kmlabel{font-size:0.55rem;color:var(--text3);text-align:right;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+
+/* ALERTA BADGE */
+.alerta{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:var(--r-pill);font-size:0.66rem;font-weight:700;margin-top:8px;
+  font-family:'Outfit',sans-serif;letter-spacing:0.3px;border:1px solid}
+.al-ok{background:rgba(16,185,129,0.1);color:var(--green);border-color:rgba(16,185,129,0.2)}
+.al-warn{background:rgba(245,158,11,0.1);color:var(--ac);border-color:rgba(245,158,11,0.2)}
+.al-danger{background:rgba(239,68,68,0.1);color:var(--red);border-color:rgba(239,68,68,0.2)}
+.al-orange{background:rgba(249,115,22,0.1);color:var(--orange);border-color:rgba(249,115,22,0.2)}
+
+/* PROGRESS */
+.prog-wrap{margin:10px 0 5px}
+.prog-bg{background:var(--card3);border-radius:99px;height:7px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;transition:width 0.7s var(--ease)}
+.prog-info{display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text3);
+  margin-top:4px;font-weight:600}
+
+/* MANT BUTTONS */
+.mant-btn{
+  padding:14px 10px;border-radius:var(--r-sm);
+  border:1.5px solid var(--border);background:var(--card2);
+  color:var(--text2);font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:700;
+  cursor:pointer;text-align:center;transition:all 0.2s var(--ease);
+  position:relative;overflow:hidden;min-height:60px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+.mant-btn:active{transform:scale(0.93)}
+.mant-btn .mi{font-size:1.4rem}
+.mant-btn .ml{font-size:0.58rem;color:var(--text3);font-weight:600}
+
+/* HIST ROW */
+.hrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.hrow:last-child{border-bottom:none}
+.hdate{font-size:0.68rem;color:var(--text3);min-width:36px;flex-shrink:0;font-weight:600}
+.hbar-wrap{flex:1;background:var(--card3);border-radius:99px;height:6px;overflow:hidden}
+.hbar{height:100%;border-radius:99px;background:var(--acg)}
+.hkm{font-size:0.75rem;font-weight:800;min-width:55px;text-align:right;color:var(--text)}
+.htot{font-size:0.6rem;color:var(--text3);min-width:65px;text-align:right;font-weight:500}
+
+/* MODO KM BUTTONS */
+.modo-btn{
+  flex:1;padding:10px 8px;border-radius:10px;border:none;
+  font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:700;
+  cursor:pointer;letter-spacing:0.3px;transition:all 0.2s var(--ease);
+  position:relative;overflow:hidden;
+}
+.modo-btn.on-ac{background:var(--acg);color:#fff;box-shadow:var(--shadow-ac)}
+.modo-btn.off{background:none;color:var(--text3)}
+.modo-btn:active{opacity:0.8}
+
+/* CALC RESULT */
+.calc-result{
+  background:rgba(245,158,11,0.06);border:1.5px solid rgba(245,158,11,0.2);
+  border-radius:var(--r-sm);padding:16px;margin-bottom:12px;text-align:center;
+  display:none;
+}
+.calc-error{
+  background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);
+  border-radius:var(--r-xs);padding:10px;text-align:center;
+  font-size:0.78rem;color:var(--red);margin-bottom:10px;display:none;
+}
+
+/* SETUP CARD */
+.setup-card{
+  background:rgba(245,158,11,0.06);border:1.5px solid rgba(245,158,11,0.25);
+  border-radius:var(--r);padding:16px;margin-bottom:12px;display:none;
+  animation:fadeInUp 0.3s var(--ease) both;
+}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px 20px;color:var(--text3);font-size:0.82rem;font-weight:500}
+.empty .ei{font-size:2.8rem;margin-bottom:12px;display:block;opacity:0.35}
+
+/* STIT */
+.stit{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--text3);margin:12px 0 8px;display:flex;align-items:center;gap:6px}
+.stit::after{content:'';flex:1;height:1px;background:var(--border2)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="back" id="backBtn">&#8592;</button>
+  <div style="flex:1;margin:0 12px">
+    <div class="tit">&#127949;&#65039; MotoTrack</div>
+    <div class="sub" id="topFecha"></div>
+  </div>
+  <div style="width:38px"></div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="content">
+
+  <!-- HERO KM -->
+  <div class="hero">
+    <div style="position:relative;z-index:1">
+      <div class="km-label">&#128205; Kilometraje actual</div>
+      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+        <div class="km-big" id="heroKm">0</div>
+        <span class="km-unit">km</span>
+      </div>
+      <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);font-weight:500">en el odometro</div>
+      <div class="km-hoy" id="heroHoy" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- SETUP CARD -->
+  <div class="setup-card" id="card-setup">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(245,158,11,0.15);
+        border:1.5px solid rgba(245,158,11,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">&#9881;&#65039;</div>
+      <div>
+        <div style="font-size:0.9rem;font-weight:700">Configuracion inicial</div>
+        <div style="font-size:0.62rem;color:var(--text3);font-weight:500">Solo la primera vez</div>
+      </div>
+    </div>
+    <div class="ig"><label>&#128205; Km actual en el odometro</label>
+      <input type="number" id="kmSetup" placeholder="Ej: 20345" inputmode="numeric"
+        style="font-size:1.3rem;font-weight:800;text-align:center;letter-spacing:-0.5px">
+    </div>
+    <div class="ig"><label>&#128704; Ultimo cambio de aceite fue a los (km)</label>
+      <input type="number" id="setupAceite" placeholder="Ej: 19500" inputmode="numeric">
+    </div>
+    <div class="ig"><label>&#128760; Ultimo cambio de llantas fue a los (km)</label>
+      <input type="number" id="setupLlanta" placeholder="Ej: 10000" inputmode="numeric">
+    </div>
+    <div class="ig"><label>&#9889; Ultimo cambio de bujia fue a los (km)</label>
+      <input type="number" id="setupBujia" placeholder="Ej: 15000" inputmode="numeric">
+    </div>
+    <div class="ig"><label>&#128683; Ultima revision de frenos fue a los (km)</label>
+      <input type="number" id="setupFreno" placeholder="Ej: 18000" inputmode="numeric">
+    </div>
+    <button onclick="guardarSetup()" class="btn bg">&#10003; Guardar configuracion inicial</button>
+  </div>
+
+  <!-- CARD REGISTRO DIARIO -->
+  <div class="card" id="card-diario">
+    <div class="ct"><span style="color:var(--ac)">&#128205;</span> Registro diario de km</div>
+    <!-- Modo tabs -->
+    <div style="display:flex;gap:4px;background:var(--card2);border-radius:12px;padding:3px;margin-bottom:14px;border:1px solid var(--border)">
+      <button id="modo-agregar" onclick="setModo('agregar')" class="modo-btn on-ac">&#43; KM del dia</button>
+      <button id="modo-corregir" onclick="setModo('corregir')" class="modo-btn off">&#9999;&#65039; Corregir</button>
+    </div>
+
+    <!-- MODO DIRECTO -->
+    <div id="panel-agregar">
+      <div style="display:flex;gap:4px;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:12px;border:1px solid var(--border)">
+        <button id="modo-directo" onclick="setModoKm('directo')" class="modo-btn on-ac" style="font-size:0.65rem">&#43; KM del dia</button>
+        <button id="modo-calc" onclick="setModoKm('calc')" class="modo-btn off" style="font-size:0.65rem">&#128290; Calculadora</button>
+      </div>
+
+      <!-- DIRECTO -->
+      <div id="km-directo">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:10px;font-weight:500">Cuantos km hiciste hoy?</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <input type="number" id="kmDia" placeholder="Ej: 62" inputmode="numeric"
+            style="flex:1;font-size:1.6rem;font-weight:900;text-align:center;letter-spacing:-0.5px">
+          <button onclick="agregarKmDia()" class="btn bg" style="width:auto;padding:12px 18px;flex-shrink:0">&#43;</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="quickKm(30)" class="sm" style="padding:7px 14px;font-size:0.72rem">+30</button>
+          <button onclick="quickKm(50)" class="sm" style="padding:7px 14px;font-size:0.72rem">+50</button>
+          <button onclick="quickKm(80)" class="sm" style="padding:7px 14px;font-size:0.72rem">+80</button>
+          <button onclick="quickKm(100)" class="sm" style="padding:7px 14px;font-size:0.72rem">+100</button>
+        </div>
+      </div>
+
+      <!-- CALCULADORA -->
+      <div id="km-calc" style="display:none">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:10px;font-weight:500">Ingresa el odometro anterior y el actual</div>
+        <div style="background:var(--card2);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;border:1px solid var(--border)">
+          <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">&#128205; Odometro anterior</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="number" id="calc-ant" placeholder="Ej: 20570" inputmode="numeric" oninput="calcDiff()"
+              style="flex:1;font-size:1.2rem;font-weight:800;text-align:center;letter-spacing:-0.5px">
+            <button onclick="usarActual()" style="padding:9px 12px;background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.3);border-radius:var(--r-xs);color:var(--ac);font-size:0.65rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif">
+              Usar actual<br><span style="font-size:0.9rem;font-weight:900" id="btn-actual-km">0 km</span>
+            </button>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:1.2rem;color:var(--text3);margin:2px 0">&#8595;</div>
+        <div style="background:var(--card2);border-radius:var(--r-sm);padding:13px;margin-bottom:10px;border:1px solid var(--border)">
+          <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">&#128205; Odometro actual (hoy)</div>
+          <input type="number" id="calc-act" placeholder="Ej: 20865" inputmode="numeric" oninput="calcDiff()"
+            style="font-size:1.2rem;font-weight:800;text-align:center;letter-spacing:-0.5px">
+        </div>
+        <!-- Resultado -->
+        <div id="calc-result" class="calc-result">
+          <div style="font-size:0.62rem;color:rgba(245,158,11,0.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700">Km recorridos hoy</div>
+          <div style="font-size:3.5rem;font-weight:900;background:var(--acg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-2px;line-height:1" id="calc-diff">0</div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-top:6px;font-weight:500">km</div>
+          <div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:0.68rem;color:var(--text3);font-weight:600">
+            <span>Anterior: <strong style="color:var(--text)" id="calc-show-ant">0</strong></span>
+            <span style="color:var(--border2)">→</span>
+            <span>Actual: <strong style="color:var(--ac)" id="calc-show-act">0</strong></span>
+          </div>
+        </div>
+        <div id="calc-error" class="calc-error"></div>
+        <button id="calc-btn" onclick="registrarDesdeCalc()" class="btn bg" style="display:none">
+          &#128190; Registrar <span id="calc-btn-km">0</span> km
+        </button>
+      </div>
+    </div>
+
+    <!-- CORREGIR -->
+    <div id="panel-corregir" style="display:none">
+      <div style="font-size:0.68rem;color:var(--text3);margin-bottom:10px;font-weight:500">Ingresa el numero exacto del odometro</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="kmCorregir" placeholder="Ej: 20407" inputmode="numeric"
+          style="flex:1;font-size:1.3rem;font-weight:800;text-align:center;letter-spacing:-0.5px">
+        <button onclick="corregirOdometro()" class="btn" style="width:auto;padding:12px 14px;flex-shrink:0;background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.3);color:var(--ac);font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:700">
+          &#9999;&#65039; Corregir
+        </button>
+      </div>
+      <div style="font-size:0.62rem;color:var(--text3);margin-top:8px;font-weight:500">Corrige el total sin agregar al historial del dia</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on" onclick="goTab('mant',this)">&#128295; Mant.</button>
+    <button class="tab" onclick="goTab('hist',this)">&#128202; Historial</button>
+    <button class="tab" onclick="goTab('conf',this)">&#9881;&#65039; Config</button>
+  </div>
+
+  <!-- TAB MANTENIMIENTO -->
+  <div id="tab-mant">
+    <div id="alertas-wrap" style="margin-bottom:10px"></div>
+    <div id="mant-cards"></div>
+    <div class="stit">&#10003; Marcar mantenimiento realizado</div>
+    <div class="g4" style="margin-bottom:10px">
+      <button class="mant-btn" onclick="hizoMant('aceite')">
+        <div class="mi">&#128704;</div><div>Cambie aceite</div>
+        <div class="ml" id="ult-aceite">Sin registrar</div>
+      </button>
+      <button class="mant-btn" onclick="hizoMant('llanta')">
+        <div class="mi">&#128760;</div><div>Cambie llanta</div>
+        <div class="ml" id="ult-llanta">Sin registrar</div>
+      </button>
+      <button class="mant-btn" onclick="hizoMant('bujia')">
+        <div class="mi">&#9889;</div><div>Cambie bujia</div>
+        <div class="ml" id="ult-bujia">Sin registrar</div>
+      </button>
+      <button class="mant-btn" onclick="hizoMant('freno')">
+        <div class="mi">&#128683;</div><div>Revise frenos</div>
+        <div class="ml" id="ult-freno">Sin registrar</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB HISTORIAL -->
+  <div id="tab-hist" style="display:none">
+    <div class="card" style="margin-bottom:8px">
+      <div class="ct"><span style="color:var(--ac)">&#128202;</span> Km recorridos por dia <button class="sm" onclick="limpiarHist()">&#128465;&#65039; Limpiar</button></div>
+      <div id="hist-lista"><div class="empty"><div class="ei">&#128202;</div>Sin registros aun</div></div>
+    </div>
+  </div>
+
+  <!-- TAB CONFIG -->
+  <div id="tab-conf" style="display:none">
+    <div class="card">
+      <div class="ct"><span style="color:var(--ac)">&#9881;&#65039;</span> Intervalos de mantenimiento</div>
+      <div class="ig"><label>&#128704; Aceite cada (km)</label><input type="number" id="int-aceite" placeholder="1000" inputmode="numeric"></div>
+      <div class="ig"><label>&#128760; Llantas cada (km)</label><input type="number" id="int-llanta" placeholder="12000" inputmode="numeric"></div>
+      <div class="ig"><label>&#9889; Bujia cada (km)</label><input type="number" id="int-bujia" placeholder="6000" inputmode="numeric"></div>
+      <div class="ig"><label>&#128683; Frenos cada (km)</label><input type="number" id="int-freno" placeholder="8000" inputmode="numeric"></div>
+      <button class="btn bg" onclick="guardarConf()">&#128190; Guardar configuracion</button>
+    </div>
+    <div class="card" style="border-color:rgba(239,68,68,0.2)">
+      <div class="ct" style="color:rgba(239,68,68,0.7)">&#9888;&#65039; Zona peligrosa</div>
+      <button class="btn brd" onclick="resetMoto()">&#128465;&#65039; Resetear todos los datos</button>
+    </div>
+  </div>
+
+</div><!-- end content -->
+
+<script>
+
+// ===== STATE =====
+var M=JSON.parse(localStorage.getItem('moto_data')||'{}');
+if(!M.conf)M.conf={aceite:1000,llanta:12000,bujia:6000,freno:8000};
+if(!M.hist)M.hist=[];
+if(!M.kmActual)M.kmActual=0;
+if(!M.ult)M.ult={aceite:0,llanta:0,bujia:0,freno:0};
+
+var MANTS=[
+  {key:'aceite',icon:'🛢',label:'Cambio de aceite',color:'#f97316',colork:'orange'},
+  {key:'llanta',icon:'🛞',label:'Cambio de llantas',color:'#22c55e',colork:'green'},
+  {key:'bujia',icon:'⚡',label:'Cambio de bujía',color:'#60a5fa',colork:'blue'},
+  {key:'freno',icon:'🔧',label:'Revisión de frenos',color:'#a855f7',colork:'purple'},
+];
+
+function sv(){try{localStorage.setItem('moto_data',JSON.stringify(M));}catch(e){}}
+function el(id){return document.getElementById(id);}
+function fmt(n){return parseInt(n||0).toLocaleString();}
+
+// RIPPLE
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.btn,.mant-btn,.tab,.back-btn');if(!b)return;
+  var r=document.createElement('span');var rect=b.getBoundingClientRect();
+  var sz=Math.max(rect.width,rect.height)*2;r.className='ripple-el';
+  r.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(e.clientX-rect.left-sz/2)+'px;top:'+(e.clientY-rect.top-sz/2)+'px';
+  b.appendChild(r);setTimeout(function(){r.remove();},600);
+});
+
+// INIT
+
+// Sync tema desde RiderTrack
+(function(){
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  if(rd.light)document.body.classList.add('L');
+  if(rd.ac)document.documentElement.style.setProperty('--ac',rd.ac);
+  if(rd.ac2)document.documentElement.style.setProperty('--ac2',rd.ac2);
+})();
+el('topFecha').textContent=new Date().toLocaleDateString('es-PE',{weekday:'long',day:'2-digit',month:'long'});
+checkSetup();
+
+// Back button — Median APK
+var backBtn=el('backBtn');
+if(backBtn){
+  backBtn.addEventListener('click',function(e){
+    e.preventDefault();
+    if(window.history.length>1){window.history.back();}
+    else{window.location.href='index.html';}
+  });
+}
+
+// TABS
+function goTab(id,btn){
+  ['mant','hist','conf'].forEach(function(t){
+    var p=el('tab-'+t);if(p)p.style.display='none';
+  });
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  var p=el('tab-'+id);if(p)p.style.display='block';
+  if(btn)btn.classList.add('on');
+  if(id==='hist')renderHist();
+  if(id==='conf')cargarConf();
+}
+
+// SETUP INICIAL
+function checkSetup(){
+  var setup=el('card-setup'),diario=el('card-diario');
+  if(!M.kmActual||M.kmActual===0){
+    if(setup)setup.style.display='block';
+  } else {
+    if(setup)setup.style.display='none';
+  }
+}
+function guardarSetup(){
+  var km=parseInt(el('kmSetup').value);
+  if(!km||km<=0){alert('Ingresa el km actual de tu moto');return;}
+  M.kmActual=km;
+  // Guardar último mantenimiento desde donde indique el usuario
+  var ac=parseInt(el('setupAceite').value)||km;
+  var ll=parseInt(el('setupLlanta').value)||km;
+  var bu=parseInt(el('setupBujia').value)||km;
+  var fr=parseInt(el('setupFreno').value)||km;
+  M.ult={aceite:ac,llanta:ll,bujia:bu,freno:fr};
+  sv();checkSetup();render();
+  showToast('✅ Moto configurada: '+fmt(km)+' km');
+}
+
+// MODO AGREGAR / CORREGIR
+var modoActual='agregar';
+function setModo(modo){
+  modoActual=modo;
+  var pa=el('panel-agregar'),pc=el('panel-corregir');
+  var ba=el('modo-agregar'),bc=el('modo-corregir');
+  if(modo==='agregar'){
+    pa.style.display='block';pc.style.display='none';
+    ba.style.background='var(--acg)';ba.style.color='#fff';
+    bc.style.background='none';bc.style.color='var(--muted)';
+  }else{
+    pa.style.display='none';pc.style.display='block';
+    bc.style.background='rgba(245,158,11,0.15)';bc.style.color='var(--warn)';bc.style.border='1px solid rgba(245,158,11,0.3)';
+    ba.style.background='none';ba.style.color='var(--muted)';
+    if(el('kmCorregir'))el('kmCorregir').value=M.kmActual||'';
+  }
+}
+
+// MODO KM
+function setModoKm(modo){
+  var d=el('km-directo'),calc=el('km-calc');
+  var bd=el('modo-directo'),bc=el('modo-calc');
+  if(modo==='directo'){
+    d.style.display='block';calc.style.display='none';
+    bd.style.background='var(--acg)';bd.style.color='#fff';
+    bc.style.background='none';bc.style.color='var(--muted)';
+  }else{
+    d.style.display='none';calc.style.display='block';
+    bc.style.background='var(--acg)';bc.style.color='#fff';
+    bd.style.background='none';bd.style.color='var(--muted)';
+    // Pre-llenar odómetro anterior con el actual
+    var btnLabel=el('btn-actual-km');
+    if(btnLabel)btnLabel.textContent=fmt(M.kmActual)+' km';
+    var antInp=el('calc-ant');
+    if(antInp&&!antInp.value&&M.kmActual)antInp.value=M.kmActual;
+    calcDiff();
+  }
+}
+function usarActual(){
+  var inp=el('calc-ant');
+  if(inp)inp.value=M.kmActual;
+  calcDiff();
+}
+function calcDiff(){
+  var ant=parseInt(el('calc-ant').value)||0;
+  var act=parseInt(el('calc-act').value)||0;
+  var res=el('calc-result'),err=el('calc-error'),btn=el('calc-btn');
+  var diff=act-ant;
+  if(!ant||!act){res.style.display='none';err.style.display='none';if(btn)btn.style.display='none';return;}
+  if(diff<=0){
+    res.style.display='none';
+    err.style.display='block';
+    err.textContent=diff===0?'⚠️ El odómetro actual es igual al anterior':'❌ El odómetro actual ('+fmt(act)+') es menor al anterior ('+fmt(ant)+')';
+    if(btn)btn.style.display='none';
+    return;
+  }
+  err.style.display='none';
+  res.style.display='block';
+  el('calc-diff').textContent=fmt(diff).replace('S/ ','');
+  el('calc-show-ant').textContent=fmt(ant).replace('S/ ','');
+  el('calc-show-act').textContent=fmt(act).replace('S/ ','');
+  if(btn){btn.style.display='block';el('calc-btn-km').textContent=fmt(diff).replace('S/ ','');}
+}
+function registrarDesdeCalc(){
+  var ant=parseInt(el('calc-ant').value)||0;
+  var act=parseInt(el('calc-act').value)||0;
+  var diff=act-ant;
+  if(diff<=0){alert('Verifica los kilómetros');return;}
+  // Registrar como km del día y actualizar odómetro
+  var hoy=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+  M.hist.unshift({fecha:hoy,km:diff,total:act,ts:Date.now()});
+  if(M.hist.length>60)M.hist.pop();
+  M.kmActual=act;
+  sv();render();
+  // Limpiar
+  el('calc-ant').value='';el('calc-act').value='';
+  el('calc-result').style.display='none';
+  el('calc-btn').style.display='none';
+  el('calc-ant').blur();el('calc-act').blur();
+  showToast('✅ +'+fmt(diff).replace('S/ ','')+' km · Total: '+fmt(act).replace('S/ ','')+' km');
+}
+// AGREGAR KM DEL DÍA
+function agregarKmDia(){
+  var km=parseInt(el('kmDia').value);
+  if(!km||km<=0){alert('Ingresa los km recorridos hoy');return;}
+  var nuevo=M.kmActual+km;
+  var hoy=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+  M.hist.unshift({fecha:hoy,km:km,total:nuevo,ts:Date.now()});
+  if(M.hist.length>60)M.hist.pop();
+  M.kmActual=nuevo;
+  sv();render();
+  el('kmDia').value='';el('kmDia').blur();
+  showToast('✅ +'+fmt(km)+' km · Total: '+fmt(nuevo)+' km');
+}
+
+// ACCESOS RAPIDOS
+function quickKm(n){
+  var inp=el('kmDia');if(!inp)return;
+  inp.value=n;agregarKmDia();
+}
+
+// CORREGIR ODÓMETRO (sin agregar al historial)
+function corregirOdometro(){
+  var km=parseInt(el('kmCorregir').value);
+  if(!km||km<=0){alert('Ingresa el km correcto');return;}
+  if(!confirm('¿Corregir odómetro a '+fmt(km)+' km? No se agregará al historial del día.')){return;}
+  // Actualizar el último registro del historial si es del mismo día
+  var hoy=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+  if(M.hist.length>0&&M.hist[0].fecha===hoy){
+    var diff=km-M.kmActual;
+    M.hist[0].km=Math.max(0,M.hist[0].km+diff);
+    M.hist[0].total=km;
+    if(M.hist[0].km===0)M.hist.shift();
+  }
+  M.kmActual=km;
+  sv();render();setModo('agregar');
+  el('kmCorregir').value='';
+  showToast('✅ Odómetro corregido: '+fmt(km)+' km');
+}
+
+// TOAST
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f1623;border:1px solid #1e3050;border-radius:12px;padding:12px 20px;color:#e8f0fe;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,0.5);white-space:nowrap;animation:popIn 0.3s ease';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2500);
+}
+
+// MARCAR MANTENIMIENTO
+function hizoMant(tipo){
+  var nombres={aceite:'🛢 Aceite',llanta:'🛞 Llantas',bujia:'⚡ Bujía',freno:'🔧 Frenos'};
+  if(!M.kmActual){alert('Primero registra tu kilometraje actual');return;}
+  if(!confirm('¿Confirmar '+nombres[tipo]+' realizado a los '+fmt(M.kmActual)+' km?'))return;
+  M.ult[tipo]=M.kmActual;sv();render();
+  showToast('✅ '+nombres[tipo]+' registrado a los '+fmt(M.kmActual)+' km');
+}
+
+// CONFIG
+function cargarConf(){
+  el('int-aceite').value=M.conf.aceite||1000;
+  el('int-llanta').value=M.conf.llanta||12000;
+  el('int-bujia').value=M.conf.bujia||6000;
+  el('int-freno').value=M.conf.freno||8000;
+}
+function guardarConf(){
+  M.conf.aceite=parseInt(el('int-aceite').value)||1000;
+  M.conf.llanta=parseInt(el('int-llanta').value)||12000;
+  M.conf.bujia=parseInt(el('int-bujia').value)||6000;
+  M.conf.freno=parseInt(el('int-freno').value)||8000;
+  sv();render();showToast('✅ Configuración guardada');
+}
+function resetMoto(){
+  if(!confirm('¿Borrar TODOS los datos de la moto?'))return;
+  M={conf:{aceite:1000,llanta:12000,bujia:6000,freno:8000},hist:[],kmActual:0,ult:{aceite:0,llanta:0,bujia:0,freno:0}};
+  sv();el('kmInp').value='';render();showToast('🗑️ Datos reseteados');
+}
+
+// PROG BAR COLOR
+function progColor(pct){
+  if(pct>=100)return '#f43f5e';
+  if(pct>=85)return '#f59e0b';
+  if(pct>=65)return '#f97316';
+  return '#22c55e';
+}
+
+// RENDER PRINCIPAL
+function render(){
+  // Hero
+  el('heroKm').textContent=fmt(M.kmActual);
+  var hoy=el('heroHoy');
+  if(M.hist.length>0&&M.hist[0].km>0){
+    hoy.style.display='block';
+    hoy.textContent='+'+fmt(M.hist[0].km)+' km hoy';
+  }else{hoy.style.display='none';}
+
+  // Alertas resumen
+  var al='';
+  MANTS.forEach(function(m){
+    var desde=M.kmActual-(M.ult[m.key]||0);
+    var faltan=M.conf[m.key]-desde;
+    if(faltan<=0){al+='<div class="alerta al-danger">🔴 '+m.icon+' '+m.label+' — VENCIDO hace '+fmt(Math.abs(faltan))+' km</div>';}
+    else if(faltan<=100){al+='<div class="alerta al-warn">🟡 '+m.icon+' '+m.label+' — solo '+fmt(faltan)+' km</div>';}
+    else if(faltan<=300){al+='<div class="alerta al-orange">🟠 '+m.icon+' '+m.label+' — '+fmt(faltan)+' km</div>';}
+  });
+  el('alertas-wrap').innerHTML=al||'<div class="alerta al-ok">✅ Todo en orden — Sin mantenimientos urgentes</div>';
+
+  // Cards mantenimiento
+  var html='';
+  MANTS.forEach(function(m,idx){
+    var desde=M.kmActual-(M.ult[m.key]||0);
+    var faltan=M.conf[m.key]-desde;
+    var pct=Math.min(desde/M.conf[m.key]*100,100);
+    var vencido=faltan<=0;
+    var urgente=faltan<=100&&!vencido;
+    var pronto=faltan<=300&&!urgente&&!vencido;
+    var cls='mc '+(vencido?'vencido':urgente||pronto?'urgente':'ok');
+    var col=progColor(pct);
+    var statusTxt=vencido
+      ?'<span style="color:var(--danger);font-weight:700;font-size:0.8rem">🔴 VENCIDO hace '+fmt(Math.abs(faltan))+' km</span>'
+      :urgente
+        ?'<span style="color:var(--warn);font-weight:700;font-size:0.8rem">🟡 Solo '+fmt(faltan)+' km</span>'
+        :pronto
+          ?'<span style="color:var(--orange);font-weight:700;font-size:0.8rem">🟠 Faltan '+fmt(faltan)+' km</span>'
+          :'<span style="color:var(--green);font-weight:700;font-size:0.8rem">✅ Faltan '+fmt(faltan)+' km</span>';
+    html+='<div class="'+cls+'" style="animation-delay:'+(idx*0.06)+'s">'
+      +'<div class="mc-top">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px;flex:1">'
+      +'<div class="mc-icon">'+m.icon+'</div>'
+      +'<div><div class="mc-title">'+m.label+'</div>'
+      +'<div class="mc-sub">Cada '+fmt(M.conf[m.key])+' km</div>'
+      +(M.ult[m.key]?'<div class="mc-sub">Último: '+fmt(M.ult[m.key])+' km</div>':'')
+      +'</div></div>'
+      +'<div><div class="mc-km" style="color:'+col+'">'+fmt(Math.max(0,faltan))+'</div>'
+      +'<div class="mc-kmlabel">km restantes</div></div>'
+      +'</div>'
+      +'<div class="prog-wrap"><div class="prog-bg"><div class="prog-fill" style="width:'+pct+'%;background:'+col+'"></div></div>'
+      +'<div class="prog-info"><span>0</span><span>'+Math.round(pct)+'%</span><span>'+fmt(M.conf[m.key])+' km</span></div></div>'
+      +statusTxt
+      +'</div>';
+  });
+  el('mant-cards').innerHTML=html;
+
+  // Botones último mantenimiento
+  var fechaHoy=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+  MANTS.forEach(function(m){
+    var e=el('ult-'+m.key);
+    if(e)e.textContent=M.ult[m.key]?'@ '+fmt(M.ult[m.key])+' km':'Sin registrar';
+  });
+}
+
+// HISTORIAL
+function renderHist(){
+  var l=el('hist-lista');if(!l)return;
+  if(!M.hist.length){l.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.8rem">📋 Sin registros aún</div>';return;}
+  var maxKm=Math.max.apply(null,M.hist.map(function(h){return h.km;}));
+  var html='';
+  M.hist.slice(0,30).forEach(function(h){
+    var pct=maxKm>0?Math.round(h.km/maxKm*100):0;
+    html+='<div class="hrow">'
+      +'<span class="hdate">'+h.fecha+'</span>'
+      +'<div class="hbar-wrap"><div class="hbar" style="width:'+pct+'%"></div></div>'
+      +'<span class="hkm">+'+fmt(h.km)+' km</span>'
+      +'<span class="htot">'+fmt(h.total)+' km</span>'
+      +'</div>';
+  });
+  l.innerHTML=html;
+}
+function limpiarHist(){
+  if(!confirm('¿Borrar historial de km?'))return;
+  M.hist=[];sv();renderHist();showToast('🗑️ Historial limpiado');
+}
+
+render();
+
+
+// RIPPLE
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.btn,.tab,.sm,.mant-btn,.back,.modo-btn');if(!b)return;
+  var r=document.createElement('span'),rect=b.getBoundingClientRect();
+  var sz=Math.max(rect.width,rect.height)*2;r.className='rip';
+  r.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(e.clientX-rect.left-sz/2)+'px;top:'+(e.clientY-rect.top-sz/2)+'px';
+  b.appendChild(r);setTimeout(function(){r.remove();},700);
+});
+
+// Sync tema desde RiderTrack
+(function(){
+  var rd=JSON.parse(localStorage.getItem('urRoute')||'{}');
+  if(rd.light)document.body.classList.add('L');
+  if(rd.ac)document.documentElement.style.setProperty('--ac',rd.ac);
+})();
+</script>
+</body>
+</html>
